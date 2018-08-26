@@ -7,19 +7,19 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "yarn && lerna bootstrap",
-    "format": "prettier-standard 'packages/ui/src/**/*.ts' 'packages/ui/src/**/*.tsx' 'packages/server/src/**/*.js'",
+    "format": "prettier-standard 'packages/**/src/**/*.ts' 'packages/**/src/**/*.tsx' 'packages/**/src/**/*.js'",
     "precommit": "lint-staged",
     "lint": "echo 'skipping standard :('"
   },
   "lint-staged": {
     "linters": {
-      "packages/*/src/**/*.tsx?": [
+      "packages/**/src/**/*.tsx?": [
         "prettier-standard",
         "git add"
       ]
     },
     "linters": {
-      "packages/*/src/**/*.jsx?": [
+      "packages/**/src/**/*.jsx?": [
         "prettier-standard",
         "git add"
       ]
