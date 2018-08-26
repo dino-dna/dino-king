@@ -1,55 +1,81 @@
 import { Character } from '../Character'
 
-export const TARGET_WIDTH = 1920 
+export const TARGET_WIDTH = 1920
 export const TARGET_HEIGTH = 1020
 
 export class GameScene extends Phaser.Scene {
   // // objects
   // private bird: Bird;
   // private pipes: Phaser.GameObjects.Group;
-  private bg: Phaser.GameObjects.TileSprite;
+  private bg: Phaser.Tilemaps.StaticTilemapLayer
+  private platforms: Phaser.Tilemaps.StaticTilemapLayer
+
   public player: Character
 
-  constructor() {
+  constructor () {
     super({
-      key: "GameScene"
+      key: 'GameScene'
     })
   }
+
   preload () {
     this.load
-      .pack("preload", "./pack.json", "preload")
+      .pack('preload', './pack.json', 'preload')
       .tilemapTiledJSON('map', 'assets/murder-king.json')
       .image('bg', 'assets/images/bg.png')
   }
-  create() {
-    this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
-    this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
-    // this.bg = this.add.tileSprite(0, 0, TARGET_WIDTH, TARGET_HEIGTH, 'bg').setOrigin(0, 0)
-    // this.bg.setScale(1)
-    const map = this.make.tilemap({ key: 'map' })
-    const tileset = map.addTilesetImage('bg', 'bg')
-    const bg = map.createStaticLayer("bg", tileset, 0, 0)
-    const platformLayer = map.createStaticLayer("platforms", tileset, 0, 0)
-    platformLayer.setCollisionByProperty({ collides: true })
-    const debugGraphics = this.add.graphics().setAlpha(0.75);
-    var platforms = this.physics.add.staticGroup();
-    platforms.create(400, 568, 'dude_blue/1').setScale(2).refreshBody();
-    platforms.create(600, 400, 'dude_blue/1');
-    platforms.create(50, 250, 'dude_blue/1', undefined, false);
-    platforms.create(750, 220, 'dude_blue/1');
-    platforms.create(0, 1040, 'dude_blue/1').setOrigin(0,0)
+
+  postCreate () {
+    const ws = new WebSocket('ws://localhost:9999')
+    ws.addEventListener('open', function open () {
+      ws.send(
+        JSON.stringify({
+          type: 'REQUEST_CHARACTER',
+          payload: {
+            team: { auto: true }
+          }
+        })
+      )
+    })
+
+    ws.addEventListener('message', ({ data }) => {
+      const message = JSON.parse(data)
+      if (message.type === 'ASSIGN_CHARACTER') {
+        this.createPlayer(message.payload)
+      } else {
+        throw new Error(`unsupported message: ${message}`)
+      }
+    })
+  }
+
+  createPlayer (config: CharacterConfig) {
+    if (this.player) {
+      return console.log('player already exists, skipping')
+    }
+    console.log(config)
     this.player = new Character({
       scene: this,
       x: 100,
       y: 450,
-      texture: 'dude_orange/1'
+      texture: `dude_${config.team}/1`
     })
     this.player.body.setCollideWorldBounds(true)
-    this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
-    this.physics.add.collider(this.player, platforms)
-    this.physics.add.collider(this.player, platformLayer)
+    this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
+    this.physics.add.collider(this.player, this.platforms)
   }
+
+  create () {
+    this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
+    this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
+    const map = this.make.tilemap({ key: 'map' })
+    const tileset = map.addTilesetImage('bg', 'bg')
+    this.bg = map.createStaticLayer('bg', tileset, 0, 0)
+    this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
+    this.platforms.setCollisionByProperty({ collides: true })
+    this.postCreate()
+  }
+
   update () {
-    this.player.update()
+    if (this.player) this.player.update()
   }
 }

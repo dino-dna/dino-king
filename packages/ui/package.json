@@ -7,10 +7,7 @@
     "start": "react-app-rewired start --scripts-version react-scripts-ts",
     "build": "react-app-rewired build --scripts-version react-scripts-ts",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "format": "prettier-standard 'src/**/*.ts' 'src/**/*.tsx'",
-    "precommit": "lint-staged",
-    "lint": "standard"
+    "eject": "react-scripts-ts eject"
   },
   "repository": {
     "type": "git",
@@ -28,7 +25,6 @@
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
     "klaw-sync": "^4.0.0",
-    "lint-staged": "^7.2.2",
     "npm-run-all": "^4.1.3",
     "phaser": "^3.11.0",
     "phaser-webpack-loader": "^2.0.0",
@@ -39,14 +35,6 @@
     "react-scripts-ts": "2.17.0",
     "standard": "^11.0.1",
     "typescript": "^3.0.1"
-  },
-  "lint-staged": {
-    "linters": {
-      "src/**/*.tsx?": [
-        "prettier-standard",
-        "git add"
-      ]
-    }
   },
   "dependencies": {
     "lodash": "^4.17.10"
