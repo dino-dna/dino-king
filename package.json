@@ -16,9 +16,7 @@
       "packages/**/src/**/*.tsx?": [
         "prettier-standard",
         "git add"
-      ]
-    },
-    "linters": {
+      ],
       "packages/**/src/**/*.jsx?": [
         "prettier-standard",
         "git add"
