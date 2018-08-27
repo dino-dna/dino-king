@@ -3,7 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start:compiler": "tsc -w",
+    "start:server": "nodemon node build/bin.js",
+    "start": "run-p start:*"
+  },
   "dependencies": {
+    "common": "^0.0.1",
     "ws": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/ws":"^6.0.0",
+    "nodemon": "^1.18.3",
+    "npm-run-all":"^4.1.3",
+    "typescript": "^3.0.1"
   }
 }

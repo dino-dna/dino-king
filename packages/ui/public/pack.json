@@ -23,103 +23,108 @@
       },
       {
         "type": "image",
-        "key": "dude_blue/1",
-        "url": "assets/images/dude_blue/1.png"
+        "key": "king_birth",
+        "url": "assets/images/king_birth.png"
       },
       {
         "type": "image",
-        "key": "dude_blue/2",
-        "url": "assets/images/dude_blue/2.png"
+        "key": "king_blue/1",
+        "url": "assets/images/king_blue/1.png"
       },
       {
         "type": "image",
-        "key": "dude_blue/3",
-        "url": "assets/images/dude_blue/3.png"
+        "key": "king_orange/1",
+        "url": "assets/images/king_orange/1.png"
       },
       {
         "type": "image",
-        "key": "dude_blue/4",
-        "url": "assets/images/dude_blue/4.png"
+        "key": "knight_blue/1",
+        "url": "assets/images/knight_blue/1.png"
       },
       {
         "type": "image",
-        "key": "dude_convert_1",
-        "url": "assets/images/dude_convert_1.png"
+        "key": "knight_blue/2",
+        "url": "assets/images/knight_blue/2.png"
       },
       {
         "type": "image",
-        "key": "dude_convert_2",
-        "url": "assets/images/dude_convert_2.png"
+        "key": "knight_blue/3",
+        "url": "assets/images/knight_blue/3.png"
       },
       {
         "type": "image",
-        "key": "dude_orange/1",
-        "url": "assets/images/dude_orange/1.png"
+        "key": "knight_blue/slash",
+        "url": "assets/images/knight_blue/slash.png"
       },
       {
         "type": "image",
-        "key": "dude_orange/2",
-        "url": "assets/images/dude_orange/2.png"
+        "key": "knight_orange/1",
+        "url": "assets/images/knight_orange/1.png"
       },
       {
         "type": "image",
-        "key": "dude_orange/3",
-        "url": "assets/images/dude_orange/3.png"
+        "key": "knight_orange/2",
+        "url": "assets/images/knight_orange/2.png"
       },
       {
         "type": "image",
-        "key": "dude_orange/4",
-        "url": "assets/images/dude_orange/4.png"
+        "key": "knight_orange/slash",
+        "url": "assets/images/knight_orange/slash.png"
       },
       {
         "type": "image",
-        "key": "mean_dude/float1",
-        "url": "assets/images/mean_dude/float1.png"
+        "key": "peon_birth",
+        "url": "assets/images/peon_birth.png"
       },
       {
         "type": "image",
-        "key": "mean_dude/slash",
-        "url": "assets/images/mean_dude/slash.png"
+        "key": "peon_blue/1",
+        "url": "assets/images/peon_blue/1.png"
       },
       {
         "type": "image",
-        "key": "mean_dude/stand",
-        "url": "assets/images/mean_dude/stand.png"
+        "key": "peon_blue/2",
+        "url": "assets/images/peon_blue/2.png"
       },
       {
         "type": "image",
-        "key": "mean_dude_blue/float",
-        "url": "assets/images/mean_dude_blue/float.png"
+        "key": "peon_blue/3",
+        "url": "assets/images/peon_blue/3.png"
       },
       {
         "type": "image",
-        "key": "mean_dude_blue/float2",
-        "url": "assets/images/mean_dude_blue/float2.png"
+        "key": "peon_blue/4",
+        "url": "assets/images/peon_blue/4.png"
       },
       {
         "type": "image",
-        "key": "mean_dude_blue/float3",
-        "url": "assets/images/mean_dude_blue/float3.png"
+        "key": "peon_orange/1",
+        "url": "assets/images/peon_orange/1.png"
       },
       {
         "type": "image",
-        "key": "mean_dude_blue/slash",
-        "url": "assets/images/mean_dude_blue/slash.png"
+        "key": "peon_orange/2",
+        "url": "assets/images/peon_orange/2.png"
       },
       {
         "type": "image",
-        "key": "queen/float",
-        "url": "assets/images/queen/float.png"
+        "key": "peon_orange/3",
+        "url": "assets/images/peon_orange/3.png"
       },
       {
         "type": "image",
-        "key": "queen_blue/float",
-        "url": "assets/images/queen_blue/float.png"
+        "key": "peon_orange/4",
+        "url": "assets/images/peon_orange/4.png"
       },
       {
         "type": "image",
         "key": "snail_1",
         "url": "assets/images/snail_1.png"
+      },
+      {
+        "type": "image",
+        "key": "assets/murder-king",
+        "url": "assets/murder-king.png"
       }
     ]
   }

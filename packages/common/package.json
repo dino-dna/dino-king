@@ -1,0 +1,12 @@
+{
+  "name": "common",
+  "version": "0.0.1",
+  "main": "build/index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^3.0.1"
+  }
+}

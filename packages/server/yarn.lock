@@ -2,9 +2,28 @@
 # yarn lockfile v1
 
 
+"@types/events@*":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
+
+"@types/node@*":
+  version "10.9.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.2.tgz#f0ab8dced5cd6c56b26765e1c0d9e4fdcc9f2a00"
+
+"@types/ws@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-6.0.0.tgz#4787c4194c29cc6361208dcf4e580e208794e012"
+  dependencies:
+    "@types/events" "*"
+    "@types/node" "*"
+
 async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
+
+typescript@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.1.tgz#43738f29585d3a87575520a4b93ab6026ef11fdb"
 
 ws@^6.0.0:
   version "6.0.0"
