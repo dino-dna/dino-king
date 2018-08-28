@@ -13,11 +13,11 @@
   },
   "lint-staged": {
     "linters": {
-      "packages/**/src/**/*.tsx?": [
+      "packages/**/src/**/*.ts": [
         "prettier-standard",
         "git add"
       ],
-      "packages/**/src/**/*.jsx?": [
+      "packages/**/src/**/*.js": [
         "prettier-standard",
         "git add"
       ]
