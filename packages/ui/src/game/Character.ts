@@ -47,16 +47,14 @@ export class Character extends Phaser.GameObjects.Sprite {
   }
 
   update (): void {
-    // this.handleAngleChange()
     this.handleInput()
-    this.isOffTheScreen()
   }
 
-  // private handleAngleChange(): void {
-  //   if (this.angle < 20) this.angle += 1
-  // }
-
   private handleInput (): void {
+    if (!this.body) {
+      console.warn('character body not yet created?')
+      return
+    }
     const { cursors } = this
     if (cursors.left!.isDown) this.body.setVelocityX(-160)
     else if (cursors.right!.isDown) this.body.setVelocityX(160)
@@ -70,11 +68,5 @@ export class Character extends Phaser.GameObjects.Sprite {
 
   public flap (): void {
     this.body.setVelocityY(-200)
-  }
-
-  private isOffTheScreen (): void {
-    if (this.y + this.height > this.scene.sys.canvas.height) {
-      this.isDead = true
-    }
   }
 }

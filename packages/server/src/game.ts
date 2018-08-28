@@ -15,15 +15,18 @@ export class Team {
     common.PlayerRegistration,
     common.PlayerState
   >
+
   constructor (opts: NewTeamOptions) {
     this.color = opts.color
     this.playersRegistrations = []
     this.maxPlayers = opts.maxPlayers || 5
     this.playerStateByRegistration = new WeakMap()
   }
+
   get isFull () {
     return this.playersRegistrations.length >= this.maxPlayers
   }
+
   registerPlayer () {
     ++Team.playerIdCounter
     const registration: common.PlayerRegistration = {
@@ -36,18 +39,21 @@ export class Team {
     this.playersRegistrations.push(registration)
     return registration
   }
+
   removePlayer (player: common.PlayerRegistration) {
     this.playersRegistrations = this.playersRegistrations.filter(
       existing => player.id !== existing.id
     )
   }
+
   setPlayerPosition (
     reg_: common.PlayerRegistration,
     position: Phaser.Math.Vector2
   ) {
     const registration = this.playersRegistrations.find(
       reg => reg.id === reg_.id
-    )!
+    )
+    if (!registration) throw new Error('player registration not found')
     const state = this.playerStateByRegistration.get(registration)
     if (!state) {
       this.playerStateByRegistration.set(registration, {
@@ -56,9 +62,16 @@ export class Team {
       })
     } else state.position = position
   }
-  get playerState () {
-    return this.playersRegistrations.map(reg =>
-      this.playerStateByRegistration.get(reg)
+
+  get playerStatesById () {
+    return this.playersRegistrations.reduce(
+      (agg: common.PlayerStateById, reg) => {
+        let state = this.playerStateByRegistration.get(reg)
+        if (!state) return agg
+        agg[reg.id] = state
+        return agg
+      },
+      {}
     )
   }
 }
@@ -67,6 +80,7 @@ export class Game {
   public teamA: Team
   public teamB: Team
   public maxPlayersPerTeam: number
+
   constructor () {
     this.maxPlayersPerTeam = 5
     this.teamA = new Team({
@@ -80,6 +94,7 @@ export class Game {
       players: []
     })
   }
+
   get gameFull () {
     return (
       this.teamA.playersRegistrations.length +
@@ -87,9 +102,17 @@ export class Game {
       this.maxPlayersPerTeam * 2
     )
   }
+
   getPlayerTeam (player: common.PlayerRegistration) {
     return player.characterConfig.team === 'blue' ? this.teamA : this.teamB
   }
+
+  get playerRegistrations () {
+    return this.teamA.playersRegistrations.concat(
+      this.teamB.playersRegistrations
+    )
+  }
+
   registerPlayer (teamColor?: common.TeamColor) {
     let targetTeam: Team
     if (!teamColor) {
@@ -105,6 +128,7 @@ export class Game {
     if (targetTeam.isFull) throw new TeamFullError()
     return targetTeam.registerPlayer()
   }
+
   removePlayer (player: common.PlayerRegistration) {
     this.getPlayerTeam(player).removePlayer(player)
   }
@@ -116,9 +140,13 @@ export class Game {
     this.getPlayerTeam(player).setPlayerPosition(player, position)
   }
 
-  get state () {
+  get state (): common.CentralGameState {
     return {
-      players: this.teamA.playerState.concat(this.teamB.playerState)
+      playerStateById: Object.assign(
+        {},
+        this.teamA.playerStatesById,
+        this.teamB.playerStatesById
+      ) as common.PlayerStateById
     }
   }
 }

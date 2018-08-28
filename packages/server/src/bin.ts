@@ -5,6 +5,7 @@ import {
   PlayerRegistration
 } from 'common'
 import { Game } from './game'
+import { debounce } from 'lodash'
 
 const wss = new WebSocket.Server({ port: 9999 })
 wss.on('connection', onConnect)
@@ -37,12 +38,19 @@ export function onClose (ws: WebSocket) {
 export function onMessage (raw: string, ws: WebSocket) {
   const message = JSON.parse(raw)
   const gameId = '1'
-  const game = gamesById[gameId]
+  let game = gamesById[gameId]
   const { type, payload } = message
   if (type === KingClientMessage.NEW_GAME) {
     // create game in gamesById
   } else if (type === KingClientMessage.REQUEST_CHARACTER) {
-    const player = game.registerPlayer()
+    const isPlayerPrexisting = playerAndGameBySocket.has(ws)
+    const player = isPlayerPrexisting
+      ? playerAndGameBySocket.get(ws)![0]
+      : game.registerPlayer()
+    isPlayerPrexisting
+      ? console.log('issuing existing player to game')
+      : console.log('issuing new player to game')
+    console.log(game.playerRegistrations)
     playerAndGameBySocket.set(ws, [player, game])
     emit(
       {
@@ -56,8 +64,20 @@ export function onMessage (raw: string, ws: WebSocket) {
       { type: KingServerMessage.HANDLE_NEW_PLAYER, payload: player },
       ws
     )
+  } else if (type === KingClientMessage.REQUEST_PLAYERS) {
+    emit(
+      {
+        type: KingServerMessage.PLAYER_REGISTRATIONS,
+        payload: game.playerRegistrations
+      },
+      ws
+    )
   } else if (type === KingClientMessage.PLAYER_POSITION) {
     game.setPlayerPosition(playerAndGameBySocket.get(ws)![0], payload)
+    broadcastDebounced(game, {
+      type: KingServerMessage.UPDATE_GAME_STATE,
+      payload: game.state
+    })
   } else {
     console.warn(`UNSUPPORTED MESSAGE: ${raw}`)
   }
@@ -77,3 +97,8 @@ export const broadcast = (
     if (!res || res[1] !== game) return
     ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(data))
   })
+
+export const broadcastDebounced = debounce(broadcast, 10, {
+  leading: true,
+  maxWait: 20
+})
