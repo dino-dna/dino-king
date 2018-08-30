@@ -9,6 +9,8 @@ import {
 export const TARGET_WIDTH = 1920
 export const TARGET_HEIGTH = 1020
 
+export type BodyStateTuple = [number, number, number, number, number, number]
+
 export class GameScene extends Phaser.Scene {
   // // objects
   // private bird: Bird;
@@ -19,12 +21,14 @@ export class GameScene extends Phaser.Scene {
   public player: Character
   public charactersById: Map<number, Character>
   public ws: WebSocket
+  public lastUpdatePlayerBodyState: BodyStateTuple
 
   constructor () {
     super({
       key: 'GameScene'
     })
     this.charactersById = new Map()
+    this.lastUpdatePlayerBodyState = [-1, -1, -1, -1, -1, -1]
   }
 
   preload () {
@@ -56,6 +60,7 @@ export class GameScene extends Phaser.Scene {
 
     ws.addEventListener('message', ({ data }) => {
       const { type, payload } = JSON.parse(data)
+      // console.log(type)
       if (type === KingServerMessage.ASSIGN_CHARACTER) {
         this.createPlayer({ player: payload, currentUser: true })
       } else if (type === KingServerMessage.HANDLE_PLAYER_DISCONNECTED) {
@@ -63,6 +68,13 @@ export class GameScene extends Phaser.Scene {
       } else if (type === KingServerMessage.HANDLE_NEW_PLAYER) {
         this.createPlayer({ player: payload })
       } else if (type === KingServerMessage.UPDATE_GAME_STATE) {
+        // console.log(
+        //   JSON.stringify(
+        //     Object['values'](payload.playerStateById).map(z =>
+        //       Object['values'](z.playerBodyState.position)
+        //     )
+        //   )
+        // )
         this.updateRemoteControlledGameState(payload)
       } else if (type === KingServerMessage.PLAYER_REGISTRATIONS) {
         this.configurePlayers(payload)
@@ -102,12 +114,19 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       x: 100,
       y: 450,
-      texture: `${player.characterConfig.type}_${player.characterConfig.team}/1`
+      texture: `${player.characterConfig.type}_${
+        player.characterConfig.team
+      }/1`,
+      characterType: player.characterConfig.type
     })
     this.characterGroup.add(character)
     character.body.setCollideWorldBounds(true)
     this.physics.add.collider(character, this.platforms)
-    this.physics.add.collider(character, this.characterGroup)
+    this.physics.add.collider(
+      character,
+      this.characterGroup,
+      this.onPlayersCollide.bind(this)
+    )
     if (currentUser) {
       this.player = character
       this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
@@ -133,11 +152,57 @@ export class GameScene extends Phaser.Scene {
     this.postCreate()
   }
 
+  onPlayersCollide (
+    player1Object: Phaser.GameObjects.GameObject,
+    player2Object: Phaser.GameObjects.GameObject
+  ) {
+    const player1Body = player1Object.body as Phaser.Physics.Arcade.Body
+    const player2Body = player2Object.body as Phaser.Physics.Arcade.Body
+    const topPlayerBody =
+      player1Body.y < player2Body.y ? player1Body : player2Body
+    const bottomPlayerBody =
+      topPlayerBody === player1Body ? player2Body : player1Body
+    const topPlayerBottomY = topPlayerBody.y + topPlayerBody.halfHeight
+    const bottomPlayerTopY = bottomPlayerBody.y - bottomPlayerBody.halfHeight
+    console.log(topPlayerBottomY, bottomPlayerTopY)
+    // @TODO improve kill conditions!
+    if (topPlayerBottomY <= bottomPlayerTopY) {
+      const currentCharacters = Array.from(this.charactersById.entries())
+      const [topId, topCharacter] = currentCharacters.find(
+        ([_, character]) => character.body === topPlayerBody
+      )
+      const [bottomId, bottomCharacter] = currentCharacters.find(
+        ([_, character]) => character.body === bottomPlayerBody
+      )
+      this.ws.send(
+        JSON.stringify({
+          type: KingClientMessage.KILL_PLAYER,
+          payload: {
+            killed: bottomId,
+            killedBy: topId
+          }
+        })
+      )
+    }
+  }
+
   update () {
     if (this.player && this.player.body) {
       this.player.update()
-      if (this.player.body.velocity.x || this.player.body.velocity.y) {
-        this.sendPlayerPosition()
+      const currentUserBodyState: BodyStateTuple = [
+        this.player.body.position.x,
+        this.player.body.position.y,
+        this.player.body.velocity.x,
+        this.player.body.velocity.y,
+        this.player.body.acceleration.x,
+        this.player.body.acceleration.y
+      ]
+      const isStateMatching = currentUserBodyState.every(
+        (v, i) => v === this.lastUpdatePlayerBodyState[i]
+      )
+      if (!isStateMatching) {
+        this.lastUpdatePlayerBodyState = currentUserBodyState
+        this.sendPlayerState()
       }
     }
   }
@@ -145,15 +210,24 @@ export class GameScene extends Phaser.Scene {
   updateRemoteControlledGameState (state: CentralGameState) {
     for (let [id, character] of this.charactersById.entries()) {
       let playerState = state.playerStateById[id]
-      if (!playerState) {
-        return character.destroy()
-      }
+      if (!playerState) return character.destroy()
       if (this.player === character) {
         // pass. whatever.  cheat it up, bro
         // if (this.player.body.position.distance(playerState.position) < 100)
       } else {
         // console.log(playerState.position.x, playerState.position.y)
-        character.setPosition(playerState.position.x, playerState.position.y)
+        character.setPosition(
+          playerState.playerBodyState.position.x + character.body.halfWidth,
+          playerState.playerBodyState.position.y + character.body.halfHeight // IDFK
+        )
+        character.body.setAcceleration(
+          playerState.playerBodyState.acceleration.x,
+          playerState.playerBodyState.acceleration.x
+        )
+        character.body.setVelocity(
+          playerState.playerBodyState.velocity.x,
+          playerState.playerBodyState.velocity.x
+        )
       }
     }
   }
@@ -162,11 +236,15 @@ export class GameScene extends Phaser.Scene {
     // @TODO remove player
   }
 
-  sendPlayerPosition () {
+  sendPlayerState () {
     this.ws.send(
       JSON.stringify({
-        type: KingClientMessage.PLAYER_POSITION,
-        payload: this.player.body.position
+        type: KingClientMessage.PLAYER_BODY_STATE,
+        payload: {
+          position: this.player.body.position,
+          velocity: this.player.body.velocity,
+          acceleration: this.player.body.acceleration
+        }
       })
     )
   }

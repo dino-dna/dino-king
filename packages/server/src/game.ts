@@ -46,9 +46,9 @@ export class Team {
     )
   }
 
-  setPlayerPosition (
+  setPlayerBodyState (
     reg_: common.PlayerRegistration,
-    position: Phaser.Math.Vector2
+    playerBodyState: common.PlayerBodyState
   ) {
     const registration = this.playersRegistrations.find(
       reg => reg.id === reg_.id
@@ -57,10 +57,10 @@ export class Team {
     const state = this.playerStateByRegistration.get(registration)
     if (!state) {
       this.playerStateByRegistration.set(registration, {
-        position,
+        playerBodyState,
         isAlive: true
       })
-    } else state.position = position
+    } else state.playerBodyState = playerBodyState
   }
 
   get playerStatesById () {
@@ -133,11 +133,11 @@ export class Game {
     this.getPlayerTeam(player).removePlayer(player)
   }
 
-  setPlayerPosition (
+  setPlayerBodyState (
     player: common.PlayerRegistration,
-    position: Phaser.Math.Vector2
+    playerBodyState: common.PlayerBodyState
   ) {
-    this.getPlayerTeam(player).setPlayerPosition(player, position)
+    this.getPlayerTeam(player).setPlayerBodyState(player, playerBodyState)
   }
 
   get state (): common.CentralGameState {

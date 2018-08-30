@@ -47,10 +47,6 @@ export function onMessage (raw: string, ws: WebSocket) {
     const player = isPlayerPrexisting
       ? playerAndGameBySocket.get(ws)![0]
       : game.registerPlayer()
-    isPlayerPrexisting
-      ? console.log('issuing existing player to game')
-      : console.log('issuing new player to game')
-    console.log(game.playerRegistrations)
     playerAndGameBySocket.set(ws, [player, game])
     emit(
       {
@@ -72,14 +68,16 @@ export function onMessage (raw: string, ws: WebSocket) {
       },
       ws
     )
-  } else if (type === KingClientMessage.PLAYER_POSITION) {
-    game.setPlayerPosition(playerAndGameBySocket.get(ws)![0], payload)
+  } else if (type === KingClientMessage.PLAYER_BODY_STATE) {
+    game.setPlayerBodyState(playerAndGameBySocket.get(ws)![0], payload)
     broadcastDebounced(game, {
       type: KingServerMessage.UPDATE_GAME_STATE,
       payload: game.state
     })
+  } else if (type === KingClientMessage.KILL_PLAYER) {
+    // @TODO ...be smart about killing off players!
   } else {
-    console.warn(`UNSUPPORTED MESSAGE: ${raw}`)
+    throw new Error(`UNSUPPORTED MESSAGE: ${raw}`)
   }
 }
 

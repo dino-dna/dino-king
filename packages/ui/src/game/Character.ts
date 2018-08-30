@@ -1,23 +1,32 @@
+import { CharacterType } from 'common'
+
 type ICharacter = {
   scene: Phaser.Scene
   x: number
   y: number
   texture: string
   frame?: string | integer
+  characterType: CharacterType
 }
 
+const DEFAULT_ACCEL_Y = 500
+
 export class Character extends Phaser.GameObjects.Sprite {
-  private isDead: boolean = false
   private jumpKey: Phaser.Input.Keyboard.Key
   public body: Phaser.Physics.Arcade.Body
   public cursors: CursorKeys
+  public characterType: CharacterType
   // private anim: Phaser.Tweens.Tween[];
 
   constructor (params: ICharacter) {
     super(params.scene, params.x, params.y, params.texture, params.frame)
     this.cursors = this.scene.input.keyboard.createCursorKeys()
     params.scene.physics.world.enable(this)
-    this.body.gravity.y = 500
+    this.body.gravity.y = DEFAULT_ACCEL_Y
+    this.body.setAllowDrag(true)
+    this.body.setDrag(100, 0)
+    this.body.setFriction(0.7, 0)
+    this.characterType = params.characterType
 
     // this.player = this.physics.add.sprite(100, 450, 'dude_orange/1');
     // player.setBounce(0.2);
@@ -58,7 +67,18 @@ export class Character extends Phaser.GameObjects.Sprite {
     const { cursors } = this
     if (cursors.left!.isDown) this.body.setVelocityX(-160)
     else if (cursors.right!.isDown) this.body.setVelocityX(160)
-    else this.body.setVelocityX(0)
+    if (cursors.down!.isDown && this.characterType === 'king') {
+      this.body.acceleration.y < 300 && this.body.setAccelerationY(600)
+      this.body.velocity.y < 400 && this.body.setVelocityY(400)
+    } else {
+      this.body.setAccelerationY(DEFAULT_ACCEL_Y)
+    }
+    if (this.body.onFloor()) {
+      this.body.setAccelerationX(0)
+      this.body.setDragX(200)
+    } else {
+      this.body.setDragX(0)
+    }
     const isFlapping =
       this.jumpKey.isDown &&
       this.jumpKey.repeats < 2 &&
