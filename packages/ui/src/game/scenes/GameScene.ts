@@ -36,6 +36,7 @@ export class GameScene extends Phaser.Scene {
     this.load
       .pack('preload', './pack.json', 'preload')
       .tilemapTiledJSON('map', 'map.json')
+      .multiatlas('king', 'king.json', 'assets')
   }
 
   postCreate () {
@@ -114,11 +115,15 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       x: 100,
       y: 450,
-      texture: `${player.characterConfig.type}_${
-        player.characterConfig.team
-      }/1`,
+      texture: player.characterConfig.type,
+      frame: 'idle/1',
       characterType: player.characterConfig.type
     })
+    if (player.characterConfig.team === 'blue') {
+      character.setTint(0xaaaaff, 0xffffff, 0x2222ff, 0x2222ff)
+    } else {
+      character.setTint(0xff0000, 0xffffff, 0xffbb00, 0xffbbff)
+    }
     this.characterGroup.add(character)
     character.body.setCollideWorldBounds(true)
     this.tilesetLayers.forEach(layer =>
