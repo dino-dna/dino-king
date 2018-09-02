@@ -6,15 +6,17 @@ import {
   CentralGameState
 } from 'common'
 
-export const TARGET_WIDTH = 1024
-export const TARGET_HEIGTH = 1024
+export const TARGET_WIDTH = 1792
+export const TARGET_HEIGTH = 1008
 
 export type BodyStateTuple = [number, number, number, number, number, number]
 
 export class GameScene extends Phaser.Scene {
-  private characterGroup: Character[]
+  private characterGroup: Phaser.GameObjects.Group
   private bg: Phaser.Tilemaps.StaticTilemapLayer
+  private bg_decor: Phaser.Tilemaps.StaticTilemapLayer
   private platforms: Phaser.Tilemaps.StaticTilemapLayer
+  private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
 
   public charactersById: Map<number, Character>
   public lastUpdatePlayerBodyState: BodyStateTuple
@@ -117,14 +119,16 @@ export class GameScene extends Phaser.Scene {
       }/1`,
       characterType: player.characterConfig.type
     })
-    this.characterGroup.push(character)
+    this.characterGroup.add(character)
     character.body.setCollideWorldBounds(true)
-    // this.matter.add.collider(character, this.bg)
-    // this.matter.add.collider(
-    //   character,
-    //   this.characterGroup,
-    //   this.onPlayersCollide.bind(this)
-    // )
+    this.tilesetLayers.forEach(layer =>
+      this.physics.add.collider(character, layer)
+    )
+    this.physics.add.collider(
+      character,
+      this.characterGroup,
+      this.onPlayersCollide.bind(this)
+    )
     if (currentUser) {
       this.player = character
       this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
@@ -142,20 +146,24 @@ export class GameScene extends Phaser.Scene {
     this.track = this.sound.add('1')
     this.track.play()
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
-    this.matter.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
+    this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
-    const tileset = map.addTilesetImage('map', 'tileset')
+    const tileset = map.addTilesetImage('tileset', 'tileset')
     this.bg = map.createStaticLayer('bg', tileset, 0, 0)
-    this.bg.setCollisionFromCollisionGroup()
-    const debugGraphics = this.add.graphics().setAlpha(0.75)
-    this.bg.renderDebug(debugGraphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+    this.bg_decor = map.createStaticLayer('bg_decor', tileset, 0, 0)
+    this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
+    this.tilesetLayers = [this.bg, this.bg_decor, this.platforms]
+    this.tilesetLayers.forEach(layer => {
+      // const debugGraphics = this.add.graphics().setAlpha(0.75)
+      // layer.renderDebug(debugGraphics, {
+      //   tileColor: null, // Color of non-colliding tiles
+      //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      // })
+      layer.setCollisionByProperty({ collides: true })
     })
-    // this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
-    this.bg.setCollisionByProperty({ collides: true })
-    this.characterGroup = []
+    this.cameras.main.setBackgroundColor('rgb(130, 240, 255)') // ){ r: 120, g: 120, b: 255, a: 0.5 })
+    this.characterGroup = this.physics.add.group()
     this.postCreate()
   }
 

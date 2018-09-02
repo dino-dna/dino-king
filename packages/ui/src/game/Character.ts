@@ -21,7 +21,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   constructor (params: ICharacter) {
     super(params.scene, params.x, params.y, params.texture, params.frame)
     this.cursors = this.scene.input.keyboard.createCursorKeys()
-    // params.scene.physics.world.enable(this)
+    params.scene.physics.world.enable(this)
     this.body.gravity.y = DEFAULT_ACCEL_Y
     this.body.setAllowDrag(true)
     this.body.setDrag(100, 0)
