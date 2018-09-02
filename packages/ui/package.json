@@ -39,5 +39,11 @@
   "dependencies": {
     "common": "^0.0.1",
     "lodash": "^4.17.10"
+  },
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:9999",
+      "ws": true
+    }
   }
 }

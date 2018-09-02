@@ -7,7 +7,7 @@ import {
 import { Game } from './game'
 import { debounce } from 'lodash'
 
-const wss = new WebSocket.Server({ port: 9999 })
+const wss = new WebSocket.Server({ path: '/api', port: 9999 })
 wss.on('connection', onConnect)
 
 // state

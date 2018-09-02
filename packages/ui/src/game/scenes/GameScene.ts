@@ -40,7 +40,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   postCreate () {
-    this.ws = new WebSocket('ws://localhost:9999')
+    this.ws = new WebSocket(`ws://${location.host}/api`)
     const ws = this.ws
     ws.addEventListener('open', function open () {
       ws.send(

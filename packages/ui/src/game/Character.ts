@@ -35,7 +35,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   public cursors: CursorKeys
   public characterType: CharacterType
   public currentAnimationName: string
-  public currentAnimationX: number
+  public currentDirX: number
   // private anim: Phaser.Tweens.Tween[];
 
   constructor (params: ICharacter) {
@@ -83,11 +83,11 @@ export class Character extends Phaser.GameObjects.Sprite {
   }
 
   private animate (key: string, dirX: number = 1) {
-    if (this.currentAnimationName === key && this.currentAnimationX === dirX) {
+    if (this.currentAnimationName === key && this.currentDirX === dirX) {
       return
     }
     this.currentAnimationName = key
-    this.currentAnimationX = dirX
+    this.currentDirX = dirX
     this.flipX = dirX === -1
     this.anims.play(`${this.characterType}_${key}`, true)
   }
@@ -114,7 +114,12 @@ export class Character extends Phaser.GameObjects.Sprite {
     if (this.body.onFloor()) {
       this.body.setAccelerationX(0)
       this.body.setDragX(400)
-      if (!this.body.velocity.x) this.animate('idle')
+      if (!this.body.velocity.x) {
+        this.animate('idle')
+        if (this.currentDirX === -1) {
+          this.setScale(this.scaleX * -1, this.scaleY)
+        }
+      }
     } else {
       this.body.setDragX(0)
     }
