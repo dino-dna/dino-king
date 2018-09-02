@@ -8,11 +8,6 @@
       },
       {
         "type": "image",
-        "key": "bg",
-        "url": "assets/images/bg.png"
-      },
-      {
-        "type": "image",
         "key": "bg_dusk",
         "url": "assets/images/bg_dusk.png"
       },
@@ -122,9 +117,14 @@
         "url": "assets/images/snail_1.png"
       },
       {
+        "type": "audio",
+        "key": "1",
+        "url": "assets/tracks/1.ogg"
+      },
+      {
         "type": "image",
-        "key": "assets/murder-king",
-        "url": "assets/murder-king.png"
+        "key": "tileset",
+        "url": "tileset.png"
       }
     ]
   }

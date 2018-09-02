@@ -15,18 +15,19 @@ export const config: GameConfig = {
   input: { keyboard: true },
   parent: 'game',
   physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 300 },
-      debug: true
+    default: 'matter',
+    matter: {
+      debug: true,
+      enableSleep: true,
+      gravity: { y: 300 }
     }
   },
   scene: gameScene.GameScene,
   title: 'Murder King',
   type: Phaser.AUTO,
   version: '1.0',
-  width: 1366,
-  height: 768,
+  width: gameScene.TARGET_WIDTH,
+  height: gameScene.TARGET_HEIGTH,
   zoom: 1
 }
 

@@ -6,22 +6,21 @@ import {
   CentralGameState
 } from 'common'
 
-export const TARGET_WIDTH = 1920
-export const TARGET_HEIGTH = 1020
+export const TARGET_WIDTH = 1024
+export const TARGET_HEIGTH = 1024
 
 export type BodyStateTuple = [number, number, number, number, number, number]
 
 export class GameScene extends Phaser.Scene {
-  // // objects
-  // private bird: Bird;
-  private characterGroup: Phaser.GameObjects.Group
+  private characterGroup: Character[]
   private bg: Phaser.Tilemaps.StaticTilemapLayer
   private platforms: Phaser.Tilemaps.StaticTilemapLayer
 
-  public player: Character
   public charactersById: Map<number, Character>
-  public ws: WebSocket
   public lastUpdatePlayerBodyState: BodyStateTuple
+  public player: Character
+  public track: Phaser.Sound.BaseSound
+  public ws: WebSocket
 
   constructor () {
     super({
@@ -34,8 +33,7 @@ export class GameScene extends Phaser.Scene {
   preload () {
     this.load
       .pack('preload', './pack.json', 'preload')
-      .tilemapTiledJSON('map', 'assets/murder-king.json')
-      .image('bg', 'assets/images/bg.png')
+      .tilemapTiledJSON('map', 'map.json')
   }
 
   postCreate () {
@@ -119,14 +117,14 @@ export class GameScene extends Phaser.Scene {
       }/1`,
       characterType: player.characterConfig.type
     })
-    this.characterGroup.add(character)
+    this.characterGroup.push(character)
     character.body.setCollideWorldBounds(true)
-    this.physics.add.collider(character, this.platforms)
-    this.physics.add.collider(
-      character,
-      this.characterGroup,
-      this.onPlayersCollide.bind(this)
-    )
+    // this.matter.add.collider(character, this.bg)
+    // this.matter.add.collider(
+    //   character,
+    //   this.characterGroup,
+    //   this.onPlayersCollide.bind(this)
+    // )
     if (currentUser) {
       this.player = character
       this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
@@ -141,14 +139,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   create () {
+    this.track = this.sound.add('1')
+    this.track.play()
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
-    this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
+    this.matter.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
-    const tileset = map.addTilesetImage('bg', 'bg')
+    const tileset = map.addTilesetImage('map', 'tileset')
     this.bg = map.createStaticLayer('bg', tileset, 0, 0)
-    this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
-    this.platforms.setCollisionByProperty({ collides: true })
-    this.characterGroup = this.physics.add.group()
+    this.bg.setCollisionFromCollisionGroup()
+    const debugGraphics = this.add.graphics().setAlpha(0.75)
+    this.bg.renderDebug(debugGraphics, {
+      tileColor: null, // Color of non-colliding tiles
+      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+    })
+    // this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
+    this.bg.setCollisionByProperty({ collides: true })
+    this.characterGroup = []
     this.postCreate()
   }
 
@@ -187,6 +194,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update () {
+    if (!this.track.isPlaying) this.track.play()
     if (this.player && this.player.body) {
       this.player.update()
       const currentUserBodyState: BodyStateTuple = [

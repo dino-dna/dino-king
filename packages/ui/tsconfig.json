@@ -20,6 +20,7 @@
     "noUnusedLocals": false // @TODO flip back!
   },
   "exclude": [
+    "public",
     "node_modules",
     "build",
     "scripts",
