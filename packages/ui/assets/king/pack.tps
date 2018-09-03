@@ -132,7 +132,7 @@
             <key>json</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../../../../../../Desktop/king_test.json</filename>
+                <filename>../../public/king.json</filename>
             </struct>
         </map>
         <key>multiPack</key>

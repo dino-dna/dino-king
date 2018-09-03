@@ -1,7 +1,7 @@
 export type TeamColor = 'blue' | 'orange'
 
 export type CentralGameState = {
-  playerStateById: PlayerStateById
+  playerStateByUuid: PlayerStateByUuid
 }
 
 export type CharacterType = 'king' | 'knight' | 'peon'
@@ -12,8 +12,8 @@ export type PlayerBodyState = {
   velocity: Phaser.Math.Vector2
 }
 
-export type PlayerStateById = {
-  [id: number]: PlayerState
+export type PlayerStateByUuid = {
+  [uuid: number]: PlayerState
 }
 
 export type PlayerState = {
@@ -21,12 +21,11 @@ export type PlayerState = {
   isAlive: boolean
 }
 export type PlayerRegistration = {
-  id: number
-  characterConfig: CharacterConfig
-}
-export type CharacterConfig = {
-  team: TeamColor
-  type: CharacterType
+  uuid: number
+  uid: number
+  tid: TeamColor
+  gid: number
+  characterType: CharacterType
 }
 
 export enum KingClientMessage {

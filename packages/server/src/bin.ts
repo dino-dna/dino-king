@@ -6,13 +6,18 @@ import {
 } from 'common'
 import { Game } from './game'
 import { debounce } from 'lodash'
+import pino from 'pino'
+
+const log = pino({
+  level: 'info'
+})
 
 const wss = new WebSocket.Server({ path: '/api', port: 9999 })
 wss.on('connection', onConnect)
 
 // state
-const gamesById = {
-  '1': new Game()
+const gamesById: { [id: string]: Game } = {
+  '1': new Game({ id: 1 })
 }
 const playerAndGameBySocket = new WeakMap<
   WebSocket,
@@ -29,6 +34,7 @@ export function onClose (ws: WebSocket) {
   const res = playerAndGameBySocket.get(ws)
   if (!res) return console.warn('player not found for socket on close')
   const [player, game] = res
+  log.info(`removing player ${player.uid} from game ${player.gid}`)
   game.removePlayer(player)
   broadcast(game, {
     type: KingServerMessage.HANDLE_PLAYER_DISCONNECTED,
@@ -37,16 +43,20 @@ export function onClose (ws: WebSocket) {
 }
 export function onMessage (raw: string, ws: WebSocket) {
   const message = JSON.parse(raw)
-  const gameId = '1'
-  let game = gamesById[gameId]
+  let game = gamesById['1'] // @TODO, i dont know. support many games?
   const { type, payload } = message
   if (type === KingClientMessage.NEW_GAME) {
     // create game in gamesById
   } else if (type === KingClientMessage.REQUEST_CHARACTER) {
-    const isPlayerPrexisting = playerAndGameBySocket.has(ws)
-    const player = isPlayerPrexisting
-      ? playerAndGameBySocket.get(ws)![0]
-      : game.registerPlayer()
+    const { uuid = null, gid = null, tid = null, uid = null } =
+      payload.cached || {}
+    let player = gid && tid && gamesById[gid] && gamesById[gid].getPlayer(uuid)
+    log.debug(`charater requested:`, { gid, tid, uuid, uid, player })
+    if (!player) {
+      player = playerAndGameBySocket.has(ws)
+        ? playerAndGameBySocket.get(ws)![0]
+        : game.registerPlayer()
+    }
     playerAndGameBySocket.set(ws, [player, game])
     emit(
       {
@@ -88,13 +98,15 @@ export const broadcast = (
   game: Game,
   data: any,
   omitSocket: WebSocket | null = null
-) =>
+) => {
+  // log.debug(data)
   wss.clients.forEach(ws => {
     if (omitSocket && ws === omitSocket) return
     const res = playerAndGameBySocket.get(ws)
     if (!res || res[1] !== game) return
     ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(data))
   })
+}
 
 export const broadcastDebounced = debounce(broadcast, 10, {
   leading: true,

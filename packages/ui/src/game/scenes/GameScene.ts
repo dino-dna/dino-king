@@ -15,11 +15,14 @@ export class GameScene extends Phaser.Scene {
   private characterGroup: Phaser.GameObjects.Group
   private bg: Phaser.Tilemaps.StaticTilemapLayer
   private bg_decor: Phaser.Tilemaps.StaticTilemapLayer
+  private map: Phaser.Tilemaps.Tilemap
   private platforms: Phaser.Tilemaps.StaticTilemapLayer
   private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
 
-  public charactersById: Map<number, Character>
+  public charactersByUuid: Map<number, Character>
+  public lastMessageEpochMs: number
   public lastUpdatePlayerBodyState: BodyStateTuple
+  public msBetweenMessages: number
   public player: Character
   public track: Phaser.Sound.BaseSound
   public ws: WebSocket
@@ -28,7 +31,9 @@ export class GameScene extends Phaser.Scene {
     super({
       key: 'GameScene'
     })
-    this.charactersById = new Map()
+    this.lastMessageEpochMs = Date.now()
+    this.msBetweenMessages = 50
+    this.charactersByUuid = new Map()
     this.lastUpdatePlayerBodyState = [-1, -1, -1, -1, -1, -1]
   }
 
@@ -42,6 +47,9 @@ export class GameScene extends Phaser.Scene {
   postCreate () {
     this.ws = new WebSocket(`ws://${location.host}/api`)
     const ws = this.ws
+    const gid = window.sessionStorage.getItem('gameId')
+    const tid = window.sessionStorage.getItem('teamId')
+    const uid = window.sessionStorage.getItem('userId')
     ws.addEventListener('open', function open () {
       ws.send(
         JSON.stringify({
@@ -53,25 +61,37 @@ export class GameScene extends Phaser.Scene {
         JSON.stringify({
           type: KingClientMessage.REQUEST_CHARACTER,
           payload: {
-            team: { auto: true } // @TODO support team color selection
+            cached: {
+              gid,
+              tid,
+              uid
+            }
           }
         })
       )
     })
-
+    const gameStateWidget = window.document.getElementById('game_state')!
+    gameStateWidget.style.display = 'block'
     ws.addEventListener('message', ({ data }) => {
+      const now = Date.now()
+      this.msBetweenMessages = this.lastMessageEpochMs - now
+      this.lastMessageEpochMs = now
       const { type, payload } = JSON.parse(data)
-      // console.log(type)
       if (type === KingServerMessage.ASSIGN_CHARACTER) {
+        const { gid, tid, uid } = payload
+        window.sessionStorage.setItem('gameId', gid)
+        window.sessionStorage.setItem('teamId', tid)
+        window.sessionStorage.setItem('userId', uid)
         this.createPlayer({ player: payload, currentUser: true })
       } else if (type === KingServerMessage.HANDLE_PLAYER_DISCONNECTED) {
         this.removePlayer(payload)
       } else if (type === KingServerMessage.HANDLE_NEW_PLAYER) {
         this.createPlayer({ player: payload })
       } else if (type === KingServerMessage.UPDATE_GAME_STATE) {
+        gameStateWidget.textContent = JSON.stringify(payload, null, 2)
         // console.log(
         //   JSON.stringify(
-        //     Object['values'](payload.playerStateById).map(z =>
+        //     Object['values'](payload.playerStateByUuid).map(z =>
         //       Object['values'](z.playerBodyState.position)
         //     )
         //   )
@@ -88,21 +108,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   configurePlayers (players: PlayerRegistration[]) {
-    const playersById = players.reduce(
+    const playersByUuid = players.reduce(
       // e.g. `keyBy`
-      (agg, p) => ({ ...{ [p.id]: p }, ...agg }),
+      (agg, p) => ({ ...{ [p.uuid]: p }, ...agg }),
       {}
     )
-    const remoteIds: Set<number> = new Set(players.map(player => player.id))
-    const localIds = new Set(this.charactersById.keys())
+    const remoteIds: Set<number> = new Set(players.map(player => player.uuid))
+    const localIds = new Set(this.charactersByUuid.keys())
     const toAdd = new Set([...remoteIds].filter(x => !localIds.has(x)))
     const toRemove = new Set([...localIds].filter(x => !remoteIds.has(x)))
-    let id: number
-    for (id of toAdd.values()) {
-      this.createPlayer({ player: playersById[id] })
+    let uuid: number
+    for (uuid of toAdd.values()) {
+      this.createPlayer({ player: playersByUuid[uuid] })
     }
-    for (id of toRemove.values()) {
-      this.removePlayer(this.charactersById.get(id)!)
+    for (uuid of toRemove.values()) {
+      this.removePlayer(this.charactersByUuid.get(uuid)!)
     }
   }
 
@@ -111,15 +131,20 @@ export class GameScene extends Phaser.Scene {
     if (currentUser && this.player) {
       return console.log('player already exists, skipping')
     }
+    const spawnPoint = this.map.findObject(
+      'spawns',
+      obj =>
+        obj.name === `${player.tid === 'blue' ? player.uid : player.uid + 5}`
+    )
     const character = new Character({
       scene: this,
-      x: 100,
-      y: 450,
-      texture: player.characterConfig.type,
+      x: (spawnPoint as any).x,
+      y: (spawnPoint as any).y,
+      texture: player.characterType,
       frame: 'idle/1',
-      characterType: player.characterConfig.type
+      characterType: player.characterType
     })
-    if (player.characterConfig.team === 'blue') {
+    if (player.tid === 'blue') {
       character.setTint(0xaaaaff, 0xffffff, 0x2222ff, 0x2222ff)
     } else {
       character.setTint(0xff0000, 0xffffff, 0xffbb00, 0xffbbff)
@@ -144,7 +169,7 @@ export class GameScene extends Phaser.Scene {
       // character.body.allowGravity = false
       // character.body.enable = false
     }
-    this.charactersById.set(player.id, character)
+    this.charactersByUuid.set(player.uuid, character)
   }
 
   create () {
@@ -153,6 +178,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
+    this.map = map
     const tileset = map.addTilesetImage('tileset', 'tileset')
     this.bg = map.createStaticLayer('bg', tileset, 0, 0)
     this.bg_decor = map.createStaticLayer('bg_decor', tileset, 0, 0)
@@ -187,7 +213,7 @@ export class GameScene extends Phaser.Scene {
     console.log(topPlayerBottomY, bottomPlayerTopY)
     // @TODO improve kill conditions!
     if (topPlayerBottomY <= bottomPlayerTopY) {
-      const currentCharacters = Array.from(this.charactersById.entries())
+      const currentCharacters = Array.from(this.charactersByUuid.entries())
       const [topId, topCharacter] = currentCharacters.find(
         ([_, character]) => character.body === topPlayerBody
       )
@@ -229,18 +255,32 @@ export class GameScene extends Phaser.Scene {
   }
 
   updateRemoteControlledGameState (state: CentralGameState) {
-    for (let [id, character] of this.charactersById.entries()) {
-      let playerState = state.playerStateById[id]
+    for (let [uuid, character] of this.charactersByUuid.entries()) {
+      let playerState = state.playerStateByUuid[uuid]
       if (!playerState) return character.destroy()
       if (this.player === character) {
         // pass. whatever.  cheat it up, bro
         // if (this.player.body.position.distance(playerState.position) < 100)
       } else {
-        // console.log(playerState.position.x, playerState.position.y)
-        character.setPosition(
-          playerState.playerBodyState.position.x + character.body.halfWidth,
-          playerState.playerBodyState.position.y + character.body.halfHeight // IDFK
-        )
+        // if things are running fast, just move the character
+        if (this.msBetweenMessages < 25) {
+          character.setPosition(
+            playerState.playerBodyState.position.x + character.body.halfWidth,
+            playerState.playerBodyState.position.y + character.body.halfHeight // IDFK
+          )
+        } else {
+          // otherwise, tween 'em over
+          character.tween && character.tween.isPlaying && character.tween.stop()
+          character.tween = this.add.tween({
+            targets: character,
+            x:
+              playerState.playerBodyState.position.x + character.body.halfWidth,
+            y:
+              playerState.playerBodyState.position.y +
+              character.body.halfHeight,
+            delay: this.msBetweenMessages * 0.75
+          })
+        }
         character.body.setAcceleration(
           playerState.playerBodyState.acceleration.x,
           playerState.playerBodyState.acceleration.x

@@ -35,6 +35,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   public characterType: CharacterType
   public currentAnimationName: string
   public cursors: CursorKeys
+  public tween: Phaser.Tweens.Tween
 
   constructor (params: ICharacter) {
     super(params.scene, params.x, params.y, params.texture, params.frame)
