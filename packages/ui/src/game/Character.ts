@@ -32,11 +32,9 @@ const DEFAULT_ACCEL_Y = 500
 export class Character extends Phaser.GameObjects.Sprite {
   private jumpKey: Phaser.Input.Keyboard.Key
   public body: Phaser.Physics.Arcade.Body
-  public cursors: CursorKeys
   public characterType: CharacterType
   public currentAnimationName: string
-  public currentDirX: number
-  // private anim: Phaser.Tweens.Tween[];
+  public cursors: CursorKeys
 
   constructor (params: ICharacter) {
     super(params.scene, params.x, params.y, params.texture, params.frame)
@@ -82,13 +80,9 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.handleInput()
   }
 
-  private animate (key: string, dirX: number = 1) {
-    if (this.currentAnimationName === key && this.currentDirX === dirX) {
-      return
-    }
+  private animate (key: string) {
+    if (this.currentAnimationName === key) return
     this.currentAnimationName = key
-    this.currentDirX = dirX
-    this.flipX = dirX === -1
     this.anims.play(`${this.characterType}_${key}`, true)
   }
 
@@ -100,10 +94,12 @@ export class Character extends Phaser.GameObjects.Sprite {
     const { cursors } = this
     if (cursors.left!.isDown) {
       this.body.setVelocityX(-160)
-      this.animate('run', -1)
+      this.setFlipX(true) // this.setScale(this.scaleX * -1, this.scaleY)
+      this.animate('run')
     } else if (cursors.right!.isDown) {
+      this.setFlipX(false)
       this.body.setVelocityX(160)
-      this.animate('run', 1)
+      this.animate('run')
     }
     if (cursors.down!.isDown && this.characterType === 'king') {
       this.body.acceleration.y < 300 && this.body.setAccelerationY(600)
@@ -114,12 +110,7 @@ export class Character extends Phaser.GameObjects.Sprite {
     if (this.body.onFloor()) {
       this.body.setAccelerationX(0)
       this.body.setDragX(400)
-      if (!this.body.velocity.x) {
-        this.animate('idle')
-        if (this.currentDirX === -1) {
-          this.setScale(this.scaleX * -1, this.scaleY)
-        }
-      }
+      if (!this.body.velocity.x) this.animate('idle')
     } else {
       this.body.setDragX(0)
     }
