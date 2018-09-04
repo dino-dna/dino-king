@@ -10,6 +10,7 @@ export type PlayerBodyState = {
   acceleration: Phaser.Math.Vector2
   position: Phaser.Math.Vector2
   velocity: Phaser.Math.Vector2
+  currentAnimationName: string
 }
 
 export type PlayerStateByUuid = {

@@ -15,7 +15,7 @@ export class App extends React.Component {
     return (
       <div className='App'>
         <div id='game' ref={node => (this.gameContainer = node)} />
-        <pre id='game_state' style={{ color: 'white', display: 'none' }} />
+        <pre id='game_state' />
       </div>
     )
   }

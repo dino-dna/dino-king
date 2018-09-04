@@ -47,19 +47,6 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.body.setFriction(0.7, 0)
     this.characterType = params.characterType
 
-    for (var type in kingFrameMeta) {
-      var frames = this.scene.anims.generateFrameNames('king', {
-        start: 1,
-        end: kingFrameMeta[type].frames,
-        prefix: `${type}/`
-      })
-      this.scene.anims.create({
-        key: `king_${type}`,
-        frames,
-        frameRate: 10,
-        repeat: -1
-      })
-    }
     // input
     this.jumpKey = params.scene.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
@@ -67,6 +54,22 @@ export class Character extends Phaser.GameObjects.Sprite {
     params.scene.add.existing(this)
 
     this.onCharacterChange()
+  }
+
+  static createKingAnimations (scene: Phaser.Scene) {
+    for (var type in kingFrameMeta) {
+      var frames = scene.anims.generateFrameNames('king', {
+        start: 1,
+        end: kingFrameMeta[type].frames,
+        prefix: `${type}/`
+      })
+      scene.anims.create({
+        key: `king_${type}`,
+        frames,
+        frameRate: 10,
+        repeat: -1
+      })
+    }
   }
 
   onCharacterChange () {
@@ -81,7 +84,7 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.handleInput()
   }
 
-  private animate (key: string) {
+  public animate (key: string) {
     if (this.currentAnimationName === key) return
     this.currentAnimationName = key
     this.anims.play(`${this.characterType}_${key}`, true)

@@ -88,14 +88,19 @@ export class GameScene extends Phaser.Scene {
       } else if (type === KingServerMessage.HANDLE_NEW_PLAYER) {
         this.createPlayer({ player: payload })
       } else if (type === KingServerMessage.UPDATE_GAME_STATE) {
-        gameStateWidget.textContent = JSON.stringify(payload, null, 2)
-        // console.log(
-        //   JSON.stringify(
-        //     Object['values'](payload.playerStateByUuid).map(z =>
-        //       Object['values'](z.playerBodyState.position)
-        //     )
-        //   )
-        // )
+        const debugState = {}
+        for (let playerUuid in payload.playerStateByUuid) {
+          let body = payload.playerStateByUuid[playerUuid].playerBodyState
+          debugState[playerUuid] = {
+            position: Object['values'](body.position)
+              .map(i => i.toFixed(0))
+              .join(','),
+            velocity: Object['values'](body.velocity)
+              .map(i => i.toFixed(0))
+              .join(',')
+          }
+        }
+        gameStateWidget.textContent = JSON.stringify(debugState, null, 2)
         this.updateRemoteControlledGameState(payload)
       } else if (type === KingServerMessage.PLAYER_REGISTRATIONS) {
         this.configurePlayers(payload)
@@ -175,6 +180,7 @@ export class GameScene extends Phaser.Scene {
   create () {
     this.track = this.sound.add('1')
     this.track.play()
+    Character.createKingAnimations(this)
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
@@ -259,13 +265,13 @@ export class GameScene extends Phaser.Scene {
       let playerState = state.playerStateByUuid[uuid]
       if (!playerState) return character.destroy()
       if (this.player === character) {
-        // pass. whatever.  cheat it up, bro
-        // if (this.player.body.position.distance(playerState.position) < 100)
+        // weee
       } else {
+        let vx = playerState.playerBodyState.velocity.x
         // if things are running fast, just move the character
         if (this.msBetweenMessages < 25) {
           character.setPosition(
-            playerState.playerBodyState.position.x + character.body.halfWidth,
+            playerState.playerBodyState.position.x + character.body.width,
             playerState.playerBodyState.position.y + character.body.halfHeight // IDFK
           )
         } else {
@@ -283,13 +289,29 @@ export class GameScene extends Phaser.Scene {
         }
         character.body.setAcceleration(
           playerState.playerBodyState.acceleration.x,
-          playerState.playerBodyState.acceleration.x
+          playerState.playerBodyState.acceleration.y
         )
         character.body.setVelocity(
           playerState.playerBodyState.velocity.x,
-          playerState.playerBodyState.velocity.x
+          playerState.playerBodyState.velocity.y
         )
+        character.animate(playerState.playerBodyState.currentAnimationName)
+        if (vx < -5 || vx > 5) {
+          character.flipX = playerState.playerBodyState.velocity.x < 0
+        }
       }
+      // # labelSprite(uuid, character)
+      // const style = {
+      //   font: '12px Arial',
+      //   fill: '#000',
+      //   wordWrap: true,
+      //   wordWrapWidth: character.width,
+      //   align: 'center',
+      //   backgroundColor: '#ffffff'
+      // }
+      // const text = this.add.text(0, 0, `${uuid}`, style)
+      // text.x = Math.floor(character.x + character.width / 2)
+      // text.y = Math.floor(character.y + character.height / 2)
     }
   }
 
@@ -304,7 +326,8 @@ export class GameScene extends Phaser.Scene {
         payload: {
           position: this.player.body.position,
           velocity: this.player.body.velocity,
-          acceleration: this.player.body.acceleration
+          acceleration: this.player.body.acceleration,
+          currentAnimationName: this.player.currentAnimationName
         }
       })
     )

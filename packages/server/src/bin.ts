@@ -45,6 +45,15 @@ export function onMessage (raw: string, ws: WebSocket) {
   const message = JSON.parse(raw)
   let game = gamesById['1'] // @TODO, i dont know. support many games?
   const { type, payload } = message
+  const broadcastRegistrations = (omittedSocket?: WebSocket) =>
+    broadcast(
+      game,
+      {
+        type: KingServerMessage.PLAYER_REGISTRATIONS,
+        payload: game.playerRegistrations
+      },
+      omittedSocket
+    )
   if (type === KingClientMessage.NEW_GAME) {
     // create game in gamesById
   } else if (type === KingClientMessage.REQUEST_CHARACTER) {
@@ -70,14 +79,9 @@ export function onMessage (raw: string, ws: WebSocket) {
       { type: KingServerMessage.HANDLE_NEW_PLAYER, payload: player },
       ws
     )
+    broadcastRegistrations()
   } else if (type === KingClientMessage.REQUEST_PLAYERS) {
-    emit(
-      {
-        type: KingServerMessage.PLAYER_REGISTRATIONS,
-        payload: game.playerRegistrations
-      },
-      ws
-    )
+    broadcastRegistrations(ws)
   } else if (type === KingClientMessage.PLAYER_BODY_STATE) {
     game.setPlayerBodyState(playerAndGameBySocket.get(ws)![0], payload)
     broadcastDebounced(game, {
