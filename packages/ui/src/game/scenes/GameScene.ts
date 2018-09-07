@@ -11,6 +11,10 @@ export const TARGET_HEIGTH = 1008
 
 export type BodyStateTuple = [number, number, number, number, number, number]
 
+export interface IEventLogState {
+  group: string | null
+}
+
 export class GameScene extends Phaser.Scene {
   private characterGroup: Phaser.GameObjects.Group
   private bg: Phaser.Tilemaps.StaticTilemapLayer
@@ -18,6 +22,7 @@ export class GameScene extends Phaser.Scene {
   private map: Phaser.Tilemaps.Tilemap
   private platforms: Phaser.Tilemaps.StaticTilemapLayer
   private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
+  private eventLogState: IEventLogState
 
   public charactersByUuid: Map<number, Character>
   public lastMessageEpochMs: number
@@ -35,6 +40,24 @@ export class GameScene extends Phaser.Scene {
     this.msBetweenMessages = 50
     this.charactersByUuid = new Map()
     this.lastUpdatePlayerBodyState = [-1, -1, -1, -1, -1, -1]
+    this.eventLogState = {
+      group: null
+    }
+  }
+
+  logEvent (type: KingServerMessage, payload: any) {
+    const { group } = this.eventLogState
+    if (type !== KingServerMessage.UPDATE_GAME_STATE) {
+      if (group) console.groupEnd()
+    } else {
+      console.groupCollapsed(type)
+      console.log(payload)
+      // leave the group open, as we expect tons of these
+      return
+    }
+    console.groupCollapsed(type)
+    console.log(payload)
+    console.groupEnd()
   }
 
   preload () {
@@ -53,12 +76,6 @@ export class GameScene extends Phaser.Scene {
     ws.addEventListener('open', function open () {
       ws.send(
         JSON.stringify({
-          type: KingClientMessage.REQUEST_PLAYERS,
-          payload: null
-        })
-      )
-      ws.send(
-        JSON.stringify({
           type: KingClientMessage.REQUEST_CHARACTER,
           payload: {
             cached: {
@@ -69,6 +86,12 @@ export class GameScene extends Phaser.Scene {
           }
         })
       )
+      ws.send(
+        JSON.stringify({
+          type: KingClientMessage.REQUEST_PLAYERS,
+          payload: null
+        })
+      )
     })
     const gameStateWidget = window.document.getElementById('game_state')!
     gameStateWidget.style.display = 'block'
@@ -77,6 +100,7 @@ export class GameScene extends Phaser.Scene {
       this.msBetweenMessages = this.lastMessageEpochMs - now
       this.lastMessageEpochMs = now
       const { type, payload } = JSON.parse(data)
+      this.logEvent(type, payload)
       if (type === KingServerMessage.ASSIGN_CHARACTER) {
         const { gid, tid, uid } = payload
         window.sessionStorage.setItem('gameId', gid)
@@ -84,14 +108,20 @@ export class GameScene extends Phaser.Scene {
         window.sessionStorage.setItem('userId', uid)
         this.createPlayer({ player: payload, currentUser: true })
       } else if (type === KingServerMessage.HANDLE_PLAYER_DISCONNECTED) {
+        console.log(payload)
         this.removePlayer(payload)
       } else if (type === KingServerMessage.HANDLE_NEW_PLAYER) {
         this.createPlayer({ player: payload })
+      } else if (type === KingServerMessage.KILL_PLAYER) {
+        this.killPlayer(payload.uuid)
       } else if (type === KingServerMessage.UPDATE_GAME_STATE) {
         const debugState = {}
         for (let playerUuid in payload.playerStateByUuid) {
           let body = payload.playerStateByUuid[playerUuid].playerBodyState
           debugState[playerUuid] = {
+            acceleration: Object['values'](body.acceleration)
+              .map(i => i.toFixed(0))
+              .join(','),
             position: Object['values'](body.position)
               .map(i => i.toFixed(0))
               .join(','),
@@ -127,7 +157,7 @@ export class GameScene extends Phaser.Scene {
       this.createPlayer({ player: playersByUuid[uuid] })
     }
     for (uuid of toRemove.values()) {
-      this.removePlayer(this.charactersByUuid.get(uuid)!)
+      this.removePlayer(uuid)
     }
   }
 
@@ -175,6 +205,7 @@ export class GameScene extends Phaser.Scene {
       // character.body.enable = false
     }
     this.charactersByUuid.set(player.uuid, character)
+    console.log(`created player [current user: ${currentUser}]: ${player.uuid}`)
   }
 
   create () {
@@ -204,6 +235,12 @@ export class GameScene extends Phaser.Scene {
     this.postCreate()
   }
 
+  killPlayer (uuid: number) {
+    const character = this.charactersByUuid.get(uuid)
+    if (!character) return
+    // @TODO animate death sequence, schedule death...schedule spawn
+  }
+
   onPlayersCollide (
     player1Object: Phaser.GameObjects.GameObject,
     player2Object: Phaser.GameObjects.GameObject
@@ -216,14 +253,13 @@ export class GameScene extends Phaser.Scene {
       topPlayerBody === player1Body ? player2Body : player1Body
     const topPlayerBottomY = topPlayerBody.y + topPlayerBody.halfHeight
     const bottomPlayerTopY = bottomPlayerBody.y - bottomPlayerBody.halfHeight
-    console.log(topPlayerBottomY, bottomPlayerTopY)
     // @TODO improve kill conditions!
     if (topPlayerBottomY <= bottomPlayerTopY) {
       const currentCharacters = Array.from(this.charactersByUuid.entries())
-      const [topId, topCharacter] = currentCharacters.find(
+      const [topId, _] = currentCharacters.find(
         ([_, character]) => character.body === topPlayerBody
       )
-      const [bottomId, bottomCharacter] = currentCharacters.find(
+      const [bottomId, __] = currentCharacters.find(
         ([_, character]) => character.body === bottomPlayerBody
       )
       this.ws.send(
@@ -300,23 +336,15 @@ export class GameScene extends Phaser.Scene {
           character.flipX = playerState.playerBodyState.velocity.x < 0
         }
       }
-      // # labelSprite(uuid, character)
-      // const style = {
-      //   font: '12px Arial',
-      //   fill: '#000',
-      //   wordWrap: true,
-      //   wordWrapWidth: character.width,
-      //   align: 'center',
-      //   backgroundColor: '#ffffff'
-      // }
-      // const text = this.add.text(0, 0, `${uuid}`, style)
-      // text.x = Math.floor(character.x + character.width / 2)
-      // text.y = Math.floor(character.y + character.height / 2)
     }
   }
 
-  removePlayer (player: any) {
-    // @TODO remove player
+  removePlayer (uuid: number) {
+    const character = this.charactersByUuid.get(uuid)
+    if (!character) return console.warn(`character uuid ${uuid} not found`)
+    character.destroy()
+    this.characterGroup.remove(character)
+    this.charactersByUuid.delete(uuid)
   }
 
   sendPlayerState () {

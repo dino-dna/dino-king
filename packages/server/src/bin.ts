@@ -81,7 +81,7 @@ export function onMessage (raw: string, ws: WebSocket) {
     )
     broadcastRegistrations()
   } else if (type === KingClientMessage.REQUEST_PLAYERS) {
-    broadcastRegistrations(ws)
+    broadcastRegistrations()
   } else if (type === KingClientMessage.PLAYER_BODY_STATE) {
     game.setPlayerBodyState(playerAndGameBySocket.get(ws)![0], payload)
     broadcastDebounced(game, {
@@ -89,7 +89,15 @@ export function onMessage (raw: string, ws: WebSocket) {
       payload: game.state
     })
   } else if (type === KingClientMessage.KILL_PLAYER) {
-    // @TODO ...be smart about killing off players!
+    const { killed, killedBy } = payload
+    broadcast(
+      game,
+      {
+        type: KingServerMessage.KILL_PLAYER,
+        payload: { uuid: killed }
+      },
+      ws
+    )
   } else {
     throw new Error(`UNSUPPORTED MESSAGE: ${raw}`)
   }
