@@ -9,7 +9,7 @@ type ICharacter = {
   characterType: CharacterType
 }
 
-const kingFrameMeta = {
+const KING_FRAME_META = {
   walk: {
     frames: 10
   },
@@ -24,6 +24,42 @@ const kingFrameMeta = {
   },
   jump: {
     frames: 12
+  }
+}
+
+const KNIGHT_FRAME_META = {
+  walk: {
+    frames: 10
+  },
+  run: {
+    frames: 10
+  },
+  dead: {
+    frames: 10
+  },
+  idle: {
+    frames: 10
+  },
+  jump: {
+    frames: 10
+  }
+}
+
+const PEON_FRAME_META = {
+  walk: {
+    frames: 10
+  },
+  run: {
+    frames: 10
+  },
+  dead: {
+    frames: 10
+  },
+  idle: {
+    frames: 10
+  },
+  jump: {
+    frames: 10
   }
 }
 
@@ -51,6 +87,8 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.characterType = params.characterType
     this.canFlap = true
 
+    this.body.setBounce(0, 0)
+
     // input
     this.jumpKey = params.scene.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
@@ -60,20 +98,26 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.onCharacterChange()
   }
 
-  static createKingAnimations (scene: Phaser.Scene) {
-    for (var type in kingFrameMeta) {
-      var frames = scene.anims.generateFrameNames('king', {
-        start: 1,
-        end: kingFrameMeta[type].frames,
-        prefix: `${type}/`
-      })
-      scene.anims.create({
-        key: `king_${type}`,
-        frames,
-        frameRate: 10,
-        repeat: -1
-      })
-    }
+  static createAnimations (scene: Phaser.Scene) {
+    ;[
+      { name: 'king', meta: KING_FRAME_META },
+      { name: 'knight', meta: KNIGHT_FRAME_META },
+      { name: 'peon', meta: PEON_FRAME_META }
+    ].forEach(({ name, meta }) => {
+      for (var type in meta as any) {
+        var frames = scene.anims.generateFrameNames(name, {
+          start: 1,
+          end: meta[type].frames,
+          prefix: `${type}/`
+        })
+        scene.anims.create({
+          key: `${name}_${type}`,
+          frames,
+          frameRate: 10,
+          repeat: -1
+        })
+      }
+    })
   }
 
   onCharacterChange () {

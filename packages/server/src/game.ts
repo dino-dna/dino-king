@@ -10,6 +10,7 @@ export class Game {
   public teamB: Team
   public maxPlayersPerTeam: number
   public id: number
+  public playerStateChangeCounter: number = 0
 
   constructor (opts: GameOptions) {
     this.id = opts.id
@@ -40,13 +41,19 @@ export class Game {
     return player.tid === 'blue' ? this.teamA : this.teamB
   }
 
-  get playerRegistrations () {
+  // get playerRegistrations () {
+  //   return this.teamA.playersRegistrations.concat(
+  //     this.teamB.playersRegistrations
+  //   )
+  // }
+
+  get players () {
     return this.teamA.playersRegistrations.concat(
       this.teamB.playersRegistrations
     )
   }
 
-  getPlayer (uuid: number): common.PlayerRegistration | null {
+  getPlayer (uuid: number): common.ServerPlayer | null {
     return this.teamA.getPlayer(uuid) || this.teamB.getPlayer(uuid)
   }
 
@@ -62,26 +69,31 @@ export class Game {
     } else {
       targetTeam = teamColor === 'blue' ? this.teamA : this.teamB
     }
+    ++this.playerStateChangeCounter
     return targetTeam.registerPlayer()
   }
 
-  removePlayer (player: common.PlayerRegistration) {
-    this.getPlayerTeam(player).removePlayer(player)
+  removePlayer (player: common.ServerPlayer) {
+    ++this.playerStateChangeCounter
+    this.getPlayerTeam(player.registration).removePlayer(player.registration)
   }
 
-  setPlayerBodyState (
-    player: common.PlayerRegistration,
+  setPlayerState (
+    player: common.ServerPlayer,
     playerBodyState: common.PlayerBodyState
   ) {
-    this.getPlayerTeam(player).setPlayerBodyState(player, playerBodyState)
+    player.state.playerBodyState = playerBodyState
+    player.state.lastUpdateTime = Date.now()
   }
 
   get state (): common.CentralGameState {
     return {
+      serverTime: Date.now(),
+      playerStateChangeCounter: this.playerStateChangeCounter,
       playerStateByUuid: Object.assign(
         {},
-        this.teamA.playerStatesById,
-        this.teamB.playerStatesById
+        this.teamA.playerStatesByUuid,
+        this.teamB.playerStatesByUuid
       ) as common.PlayerStateByUuid
     }
   }

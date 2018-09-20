@@ -28,8 +28,15 @@ export class Team {
     this.playerIdCounter = 0
   }
 
-  getPlayer (uuid: number): common.PlayerRegistration | null {
-    return this.playersRegistrations.find(reg => reg.uuid === uuid) || null
+  getPlayer (uuid: number): common.ServerPlayer | null {
+    const registration = this.playersRegistrations.find(
+      reg => reg.uuid === uuid
+    )
+    if (!registration) return null
+    return {
+      registration,
+      state: this.playerStateByRegistration.get(registration)!
+    }
   }
 
   get isFull () {
@@ -53,11 +60,26 @@ export class Team {
       uuid: Team.uuid,
       uid: playerId,
       tid: this.color,
-      gid: this.gameId,
-      characterType: this.playersRegistrations.length ? 'peon' : 'king'
+      gid: this.gameId
     }
     this.playersRegistrations.push(registration)
-    return registration
+    const playerState: common.PlayerState = {
+      characterType: this.playersRegistrations.length ? 'peon' : 'king',
+      isAlive: true,
+      lastUpdateTime: Date.now(),
+      playerBodyState: {
+        currentAnimationName: '__init__',
+        acceleration: { x: 0, y: 0 },
+        velocity: { x: 0, y: 0 },
+        position: { x: 0, y: 0 }
+      }
+    }
+    this.playerStateByRegistration.set(registration, playerState)
+    const player: common.ServerPlayer = {
+      state: playerState,
+      registration
+    }
+    return player
   }
 
   removePlayer (player: common.PlayerRegistration) {
@@ -70,28 +92,11 @@ export class Team {
     }
   }
 
-  setPlayerBodyState (
-    reg_: common.PlayerRegistration,
-    playerBodyState: common.PlayerBodyState
-  ) {
-    const registration = this.playersRegistrations.find(
-      reg => reg.uid === reg_.uid
-    )
-    if (!registration) throw new Error('player registration not found')
-    const state = this.playerStateByRegistration.get(registration)
-    if (!state) {
-      this.playerStateByRegistration.set(registration, {
-        playerBodyState,
-        isAlive: true
-      })
-    } else state.playerBodyState = playerBodyState
-  }
-
-  get playerStatesById () {
+  get playerStatesByUuid () {
     return this.playersRegistrations.reduce(
       (agg: common.PlayerStateByUuid, reg) => {
         let state = this.playerStateByRegistration.get(reg)
-        if (!state) return agg
+        if (!state) throw new Error(`state for player ${reg.uuid} not found`)
         agg[reg.uuid] = state
         return agg
       },

@@ -12,6 +12,7 @@
     "common": "^0.0.1",
     "lodash": "^4.17.10",
     "pino": "^5.4.0",
+    "pino-pretty": "^2.2.0",
     "ws": "^6.0.0"
   },
   "devDependencies": {

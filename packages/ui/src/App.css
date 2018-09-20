@@ -4,18 +4,40 @@
   flex-direction: column;
   align-items: center;
 }
+
+.App--error {
+  display: block;
+}
+
+.App--running {
+  background-color: black;
+}
+
+.banner__state--error {
+  background: white;
+  border-radius: 2px;
+  opacity: 0.5;
+  padding: 10px;
+  width: 100%;
+}
+
 #game > * {
   width: 100vw;
   max-height: 100vh;
 }
 
-#game_state {
+
+.game-state__pane {
+  background: rgba(0,0,0,0.5);
+  border-radius: 4px;
   color: white;
   display: block;
+  padding: 4px;
   position: fixed;
   right: 0;
   top: 0;
-  background: rgba(0,0,0,0.5);
-  border-radius: 4px;
-  padding: 4px;
+  visibility: hidden;
+}
+.game-state__pane--visible {
+  visibility: visible;
 }

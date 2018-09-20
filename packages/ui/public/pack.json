@@ -3,128 +3,23 @@
     "files": [
       {
         "type": "image",
-        "key": "balls",
-        "url": "assets/images/balls.png"
+        "key": "characters/king",
+        "url": "characters/king.png"
       },
       {
         "type": "image",
-        "key": "bg_dusk",
-        "url": "assets/images/bg_dusk.png"
+        "key": "characters/knight",
+        "url": "characters/knight.png"
       },
       {
         "type": "image",
-        "key": "bg_night",
-        "url": "assets/images/bg_night.png"
-      },
-      {
-        "type": "image",
-        "key": "king_birth",
-        "url": "assets/images/king_birth.png"
-      },
-      {
-        "type": "image",
-        "key": "king_blue/1",
-        "url": "assets/images/king_blue/1.png"
-      },
-      {
-        "type": "image",
-        "key": "king_orange/1",
-        "url": "assets/images/king_orange/1.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_blue/1",
-        "url": "assets/images/knight_blue/1.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_blue/2",
-        "url": "assets/images/knight_blue/2.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_blue/3",
-        "url": "assets/images/knight_blue/3.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_blue/slash",
-        "url": "assets/images/knight_blue/slash.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_orange/1",
-        "url": "assets/images/knight_orange/1.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_orange/2",
-        "url": "assets/images/knight_orange/2.png"
-      },
-      {
-        "type": "image",
-        "key": "knight_orange/slash",
-        "url": "assets/images/knight_orange/slash.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_birth",
-        "url": "assets/images/peon_birth.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_blue/1",
-        "url": "assets/images/peon_blue/1.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_blue/2",
-        "url": "assets/images/peon_blue/2.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_blue/3",
-        "url": "assets/images/peon_blue/3.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_blue/4",
-        "url": "assets/images/peon_blue/4.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_orange/1",
-        "url": "assets/images/peon_orange/1.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_orange/2",
-        "url": "assets/images/peon_orange/2.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_orange/3",
-        "url": "assets/images/peon_orange/3.png"
-      },
-      {
-        "type": "image",
-        "key": "peon_orange/4",
-        "url": "assets/images/peon_orange/4.png"
-      },
-      {
-        "type": "image",
-        "key": "snail_1",
-        "url": "assets/images/snail_1.png"
-      },
-      {
-        "type": "image",
-        "key": "assets/king",
-        "url": "assets/king.png"
+        "key": "characters/peon",
+        "url": "characters/peon.png"
       },
       {
         "type": "audio",
         "key": "1",
-        "url": "assets/tracks/1.ogg"
+        "url": "tracks/1.ogg"
       },
       {
         "type": "image",

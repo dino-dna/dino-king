@@ -3,8 +3,12 @@ import {
   KingClientMessage,
   KingServerMessage,
   PlayerRegistration,
-  CentralGameState
+  CentralGameState,
+  ServerPlayer
 } from 'common'
+import { TINTS } from '../pallette'
+import { EventEmitter } from 'events'
+import { GameMessages } from '../../interfaces'
 
 export const TARGET_WIDTH = 1792
 export const TARGET_HEIGTH = 1008
@@ -13,6 +17,7 @@ export type BodyStateTuple = [number, number, number, number, number, number]
 
 export interface IEventLogState {
   group: string | null
+  lastEventType: string
 }
 
 export class GameScene extends Phaser.Scene {
@@ -24,6 +29,7 @@ export class GameScene extends Phaser.Scene {
   private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
   private eventLogState: IEventLogState
 
+  public centralState: CentralGameState
   public charactersByUuid: Map<number, Character>
   public lastMessageEpochMs: number
   public lastUpdatePlayerBodyState: BodyStateTuple
@@ -31,6 +37,7 @@ export class GameScene extends Phaser.Scene {
   public player: Character
   public track: Phaser.Sound.BaseSound
   public ws: WebSocket
+  public bus: EventEmitter
 
   constructor () {
     super({
@@ -41,33 +48,14 @@ export class GameScene extends Phaser.Scene {
     this.charactersByUuid = new Map()
     this.lastUpdatePlayerBodyState = [-1, -1, -1, -1, -1, -1]
     this.eventLogState = {
-      group: null
+      group: null,
+      lastEventType: ''
     }
+    this.bus = (window as any).bus
+    if (!this.bus) throw new Error('game message bus not found')
   }
 
-  logEvent (type: KingServerMessage, payload: any) {
-    const { group } = this.eventLogState
-    if (type !== KingServerMessage.UPDATE_GAME_STATE) {
-      if (group) console.groupEnd()
-    } else {
-      console.groupCollapsed(type)
-      console.log(payload)
-      // leave the group open, as we expect tons of these
-      return
-    }
-    console.groupCollapsed(type)
-    console.log(payload)
-    console.groupEnd()
-  }
-
-  preload () {
-    this.load
-      .pack('preload', './pack.json', 'preload')
-      .tilemapTiledJSON('map', 'map.json')
-      .multiatlas('king', 'king.json', 'assets')
-  }
-
-  postCreate () {
+  listen () {
     this.ws = new WebSocket(`ws://${location.host}/api`)
     const ws = this.ws
     const gid = window.sessionStorage.getItem('gameId')
@@ -93,53 +81,34 @@ export class GameScene extends Phaser.Scene {
         })
       )
     })
-    const gameStateWidget = window.document.getElementById('game_state')!
-    gameStateWidget.style.display = 'block'
-    ws.addEventListener('message', ({ data }) => {
-      const now = Date.now()
-      this.msBetweenMessages = this.lastMessageEpochMs - now
-      this.lastMessageEpochMs = now
-      const { type, payload } = JSON.parse(data)
-      this.logEvent(type, payload)
-      if (type === KingServerMessage.ASSIGN_CHARACTER) {
-        const { gid, tid, uid } = payload
-        window.sessionStorage.setItem('gameId', gid)
-        window.sessionStorage.setItem('teamId', tid)
-        window.sessionStorage.setItem('userId', uid)
-        this.createPlayer({ player: payload, currentUser: true })
-      } else if (type === KingServerMessage.HANDLE_PLAYER_DISCONNECTED) {
-        console.log(payload)
-        this.removePlayer(payload)
-      } else if (type === KingServerMessage.HANDLE_NEW_PLAYER) {
-        this.createPlayer({ player: payload })
-      } else if (type === KingServerMessage.KILL_PLAYER) {
-        this.killPlayer(payload.uuid)
-      } else if (type === KingServerMessage.UPDATE_GAME_STATE) {
-        const debugState = {}
-        for (let playerUuid in payload.playerStateByUuid) {
-          let body = payload.playerStateByUuid[playerUuid].playerBodyState
-          debugState[playerUuid] = {
-            acceleration: Object['values'](body.acceleration)
-              .map(i => i.toFixed(0))
-              .join(','),
-            position: Object['values'](body.position)
-              .map(i => i.toFixed(0))
-              .join(','),
-            velocity: Object['values'](body.velocity)
-              .map(i => i.toFixed(0))
-              .join(',')
-          }
-        }
-        gameStateWidget.textContent = JSON.stringify(debugState, null, 2)
-        this.updateRemoteControlledGameState(payload)
-      } else if (type === KingServerMessage.PLAYER_REGISTRATIONS) {
-        this.configurePlayers(payload)
-      } else {
-        throw new Error(
-          `unsupported message type: ${type || 'MESSAGE_TYPE_MISSING'}`
-        )
-      }
+    ws.addEventListener('error', (evt: Event) => {
+      this.bus.emit(GameMessages.SocketError)
     })
+    ws.addEventListener('message', ({ data }) => {
+      this.onMessage(data)
+    })
+  }
+
+  private logEvent (type: KingServerMessage, payload: any) {
+    if (
+      type === KingServerMessage.UPDATE_GAME_STATE &&
+      this.eventLogState.lastEventType === KingServerMessage.UPDATE_GAME_STATE
+    ) {
+      return
+    }
+    console.groupCollapsed(type)
+    console.log(payload)
+    console.groupEnd()
+    this.eventLogState.lastEventType = type
+  }
+
+  preload () {
+    this.load
+      .pack('preload', './pack.json', 'preload')
+      .tilemapTiledJSON('map', 'map.json')
+      .multiatlas('king', 'characters/king.json', 'characters')
+      .multiatlas('knight', 'characters/knight.json', 'characters')
+      .multiatlas('peon', 'characters/peon.json', 'characters')
   }
 
   configurePlayers (players: PlayerRegistration[]) {
@@ -149,69 +118,20 @@ export class GameScene extends Phaser.Scene {
       {}
     )
     const remoteIds: Set<number> = new Set(players.map(player => player.uuid))
-    const localIds = new Set(this.charactersByUuid.keys())
+    const localIds: Set<number> = new Set(this.charactersByUuid.keys())
     const toAdd = new Set([...remoteIds].filter(x => !localIds.has(x)))
     const toRemove = new Set([...localIds].filter(x => !remoteIds.has(x)))
     let uuid: number
     for (uuid of toAdd.values()) {
       this.createPlayer({ player: playersByUuid[uuid] })
     }
-    for (uuid of toRemove.values()) {
-      this.removePlayer(uuid)
-    }
-  }
-
-  createPlayer (opts: { player: PlayerRegistration; currentUser?: boolean }) {
-    const { player, currentUser } = opts
-    if (currentUser && this.player) {
-      return console.log('player already exists, skipping')
-    }
-    const spawnPoint = this.map.findObject(
-      'spawns',
-      obj =>
-        obj.name === `${player.tid === 'blue' ? player.uid : player.uid + 5}`
-    )
-    const character = new Character({
-      scene: this,
-      x: (spawnPoint as any).x,
-      y: (spawnPoint as any).y,
-      texture: player.characterType,
-      frame: 'idle/1',
-      characterType: player.characterType
-    })
-    if (player.tid === 'blue') {
-      character.setTint(0xaaaaff, 0xffffff, 0x2222ff, 0x2222ff)
-    } else {
-      character.setTint(0xff0000, 0xffffff, 0xffbb00, 0xffbbff)
-    }
-    this.characterGroup.add(character)
-    character.body.setCollideWorldBounds(true)
-    this.tilesetLayers.forEach(layer =>
-      this.physics.add.collider(character, layer)
-    )
-    this.physics.add.collider(
-      character,
-      this.characterGroup,
-      this.onPlayersCollide.bind(this)
-    )
-    if (currentUser) {
-      this.player = character
-      this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
-    } else {
-      // console.log('creating static character')
-      // character.body.setImmovable(true)
-      // character.body.setGravity(0, 0)
-      // character.body.allowGravity = false
-      // character.body.enable = false
-    }
-    this.charactersByUuid.set(player.uuid, character)
-    console.log(`created player [current user: ${currentUser}]: ${player.uuid}`)
+    for (uuid of toRemove.values()) this.removePlayer(uuid)
   }
 
   create () {
     this.track = this.sound.add('1')
     this.track.play()
-    Character.createKingAnimations(this)
+    Character.createAnimations(this)
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
@@ -232,13 +152,110 @@ export class GameScene extends Phaser.Scene {
     })
     this.cameras.main.setBackgroundColor('rgb(130, 240, 255)') // ){ r: 120, g: 120, b: 255, a: 0.5 })
     this.characterGroup = this.physics.add.group()
-    this.postCreate()
+    this.listen()
+  }
+
+  createPlayer (opts: { player: ServerPlayer; currentUser?: boolean }) {
+    const { player, currentUser = false } = opts
+    const { registration, state } = player
+    const existingPlayer = this.charactersByUuid.get(registration.uuid)
+    if (existingPlayer) {
+      return console.log(`player uuid: ${registration.uuid} exists, skipping`)
+    }
+    const spawnPoint = this.map.findObject(
+      'spawns',
+      obj =>
+        obj.name ===
+        `${
+          registration.tid === 'blue' ? registration.uid : registration.uid + 5
+        }`
+    )
+    const character = new Character({
+      scene: this,
+      x: (spawnPoint as any).x,
+      y: (spawnPoint as any).y,
+      texture: state.characterType,
+      frame: 'idle/1',
+      characterType: state.characterType
+    })
+    character.animate('idle')
+    const characterTints =
+      registration.tid === 'blue' ? TINTS.BLUE : TINTS.ORANGE
+    character.setTint(...characterTints)
+    this.characterGroup.add(character)
+    character.body.setCollideWorldBounds(true)
+    this.tilesetLayers.forEach(layer =>
+      this.physics.add.collider(character, layer)
+    )
+    this.physics.add.collider(
+      character,
+      this.characterGroup,
+      this.onPlayersCollide.bind(this)
+    )
+    if (currentUser) {
+      this.player = character
+      this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
+    } else {
+      // console.log('creating static character')
+      // character.body.setImmovable(true)
+      // character.body.setGravity(0, 0)
+      // character.body.allowGravity = false
+      // character.body.enable = false
+    }
+    this.charactersByUuid.set(registration.uuid, character)
+    console.log(
+      `created player [current user: ${currentUser}]: ${registration.uuid}`
+    )
   }
 
   killPlayer (uuid: number) {
     const character = this.charactersByUuid.get(uuid)
     if (!character) return
-    // @TODO animate death sequence, schedule death...schedule spawn
+    character.animate('dead')
+    // @TODO prevent player from being interacted with.  essentially turn the Sprite into
+    // animation only--remove all physics and interactivity from it!
+    character.destroy()
+    this.charactersByUuid.delete(uuid)
+  }
+
+  onMessage (data: any) {
+    const now = Date.now()
+    this.msBetweenMessages = this.lastMessageEpochMs - now
+    this.lastMessageEpochMs = now
+    const { type, payload } = JSON.parse(data)
+    this.logEvent(type, payload)
+    switch (type) {
+      case KingServerMessage.ASSIGN_CHARACTER:
+        const { gid, tid, uid } = payload
+        window.sessionStorage.setItem('gameId', gid)
+        window.sessionStorage.setItem('teamId', tid)
+        window.sessionStorage.setItem('userId', uid)
+        this.createPlayer({ player: payload, currentUser: true })
+        break
+      case KingServerMessage.HANDLE_NEW_PLAYER:
+        this.createPlayer({ player: payload })
+        break
+      case KingServerMessage.HANDLE_PLAYER_DISCONNECTED:
+        this.removePlayer(payload)
+        break
+      case KingServerMessage.KILL_PLAYER:
+        this.killPlayer(payload.uuid)
+        break
+      case KingServerMessage.UPDATE_GAME_STATE:
+        this.updateDebugWidget(payload)
+        this.updateRemoteControlledGameState(payload)
+        break
+      case KingServerMessage.PLAYER_REGISTRATIONS:
+        this.configurePlayers(payload)
+        break
+      case KingServerMessage.TEARDOWN:
+        this.bus.emit(GameMessages.GameShutdown)
+        break
+      default:
+        throw new Error(
+          `unsupported message type: ${type || 'MESSAGE_TYPE_MISSING'}`
+        )
+    }
   }
 
   onPlayersCollide (
@@ -296,30 +313,95 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  updateDebugWidget (payload: CentralGameState) {
+    const gameStateWidget =
+      (this as any)._debug_widget ||
+      window.document.getElementById('game_state')!
+    if (!(this as any)._debug_widget) {
+      ;(this as any)._debug_widget = gameStateWidget
+    }
+    gameStateWidget.style.display = 'block'
+    const debugState = {}
+    for (let playerUuid in payload.playerStateByUuid) {
+      let body = payload.playerStateByUuid[playerUuid].playerBodyState
+      let localCharacter = this.charactersByUuid.get(parseInt(playerUuid))
+      let localBody: Phaser.Physics.Arcade.Body | undefined
+      if (localCharacter) localBody = localCharacter.body
+      if (body) {
+        debugState[playerUuid] = {
+          acceleration: Object['values'](body.acceleration)
+            .map(i => i.toFixed(0))
+            .join(','),
+          position: Object['values'](body.position)
+            .map(i => i.toFixed(0))
+            .join(','),
+          velocity: Object['values'](body.velocity)
+            .map(i => i.toFixed(0))
+            .join(','),
+          velocityLocal: !localBody
+            ? 'no_local_body'
+            : Object['values'](localBody.velocity)
+              .map(i => i.toFixed(0))
+              .join(',')
+        }
+      }
+    }
+    gameStateWidget.textContent = JSON.stringify(debugState, null, 2)
+  }
+
   updateRemoteControlledGameState (state: CentralGameState) {
+    this.centralState = state
     for (let [uuid, character] of this.charactersByUuid.entries()) {
       let playerState = state.playerStateByUuid[uuid]
-      if (!playerState) return character.destroy()
+      const targetX = playerState.playerBodyState.position.x
+      const targetY = playerState.playerBodyState.position.y
+      if (!playerState) {
+        console.log(`destroying character: ${uuid}`)
+        character.destroy()
+        this.charactersByUuid.delete(uuid)
+        return
+      }
+      // @TODO
+      // @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO// @TODO
+      // @TODO// @TODO// @TODO// @TODO// @TODO// @TODO
+      // @TODO
+      // @TODO
+      // @TODO// @TODO
+      // @TODO// @TODO
+      // @TODO
+      // schedule a "notification not received event" that is debounced, but,
+      // have every call to this method call into it, so the debouce never actually
+      // fires with a good connection.  when it does fire, all it does is set a flag
+      // truthy, and the update loop catches it, and restarts the loopskie.
       if (this.player === character) {
-        // weee
-      } else {
+        // don't update self from server.  be your own man
+      } else if (playerState.playerBodyState) {
         let vx = playerState.playerBodyState.velocity.x
         // if things are running fast, just move the character
-        if (this.msBetweenMessages < 25) {
+        console.log(
+          character.body.position.x,
+          targetX,
+          character.body.position.y,
+          targetY
+        )
+        if (
+          character.body.position.x === targetX &&
+          character.body.position.y === targetY
+        ) {
+          // no op
+          console.log('player didnt move')
+        } else if (this.msBetweenMessages < 25) {
           character.setPosition(
-            playerState.playerBodyState.position.x + character.body.width,
-            playerState.playerBodyState.position.y + character.body.halfHeight // IDFK
+            targetX + character.body.width,
+            targetY + character.body.halfHeight
           )
         } else {
           // otherwise, tween 'em over
           character.tween && character.tween.isPlaying && character.tween.stop()
           character.tween = this.add.tween({
             targets: character,
-            x:
-              playerState.playerBodyState.position.x + character.body.halfWidth,
-            y:
-              playerState.playerBodyState.position.y +
-              character.body.halfHeight,
+            x: targetX + character.body.width,
+            y: targetY + character.body.halfHeight,
             delay: this.msBetweenMessages * 0.75
           })
         }
@@ -331,7 +413,14 @@ export class GameScene extends Phaser.Scene {
           playerState.playerBodyState.velocity.x,
           playerState.playerBodyState.velocity.y
         )
-        character.animate(playerState.playerBodyState.currentAnimationName)
+        if (
+          character.anims.currentAnim &&
+          playerState.playerBodyState.currentAnimationName &&
+          playerState.playerBodyState.currentAnimationName !==
+            character.anims.currentAnim.key
+        ) {
+          character.animate(playerState.playerBodyState.currentAnimationName)
+        }
         if (vx < -5 || vx > 5) {
           character.flipX = playerState.playerBodyState.velocity.x < 0
         }
