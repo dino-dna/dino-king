@@ -30,15 +30,11 @@ export class Game {
   }
 
   get gameFull () {
-    return (
-      this.teamA.playersRegistrations.length +
-        this.teamB.playersRegistrations.length >=
-      this.maxPlayersPerTeam * 2
-    )
+    return this.teamA.players.length + this.teamB.players.length >= this.maxPlayersPerTeam * 2
   }
 
-  getPlayerTeam (player: common.PlayerRegistration) {
-    return player.tid === 'blue' ? this.teamA : this.teamB
+  getPlayerTeam (player: common.PlayerState) {
+    return player.teamId === 'blue' ? this.teamA : this.teamB
   }
 
   // get playerRegistrations () {
@@ -48,12 +44,10 @@ export class Game {
   // }
 
   get players () {
-    return this.teamA.playersRegistrations.concat(
-      this.teamB.playersRegistrations
-    )
+    return this.teamA.players.concat(this.teamB.players)
   }
 
-  getPlayer (uuid: number): common.ServerPlayer | null {
+  getPlayer (uuid: number): common.PlayerState | null {
     return this.teamA.getPlayer(uuid) || this.teamB.getPlayer(uuid)
   }
 
@@ -61,11 +55,7 @@ export class Game {
     let targetTeam: Team
     if (!teamColor) {
       // assign to team with less players
-      targetTeam =
-        this.teamA.playersRegistrations.length >
-        this.teamB.playersRegistrations.length
-          ? this.teamB
-          : this.teamA
+      targetTeam = this.teamA.players.length > this.teamB.players.length ? this.teamB : this.teamA
     } else {
       targetTeam = teamColor === 'blue' ? this.teamA : this.teamB
     }
@@ -73,17 +63,14 @@ export class Game {
     return targetTeam.registerPlayer()
   }
 
-  removePlayer (player: common.ServerPlayer) {
+  removePlayer (player: common.PlayerState) {
     ++this.playerStateChangeCounter
-    this.getPlayerTeam(player.registration).removePlayer(player.registration)
+    this.getPlayerTeam(player).removePlayer(player)
   }
 
-  setPlayerState (
-    player: common.ServerPlayer,
-    playerBodyState: common.PlayerBodyState
-  ) {
-    player.state.playerBodyState = playerBodyState
-    player.state.lastUpdateTime = Date.now()
+  setPlayerState (player: common.PlayerState, playerBodyState: common.PlayerBodyState) {
+    player.playerBodyState = playerBodyState
+    player.lastUpdateTime = Date.now()
   }
 
   get state (): common.CentralGameState {
@@ -92,8 +79,8 @@ export class Game {
       playerStateChangeCounter: this.playerStateChangeCounter,
       playerStateByUuid: Object.assign(
         {},
-        this.teamA.playerStatesByUuid,
-        this.teamB.playerStatesByUuid
+        this.teamA.playersByUuid,
+        this.teamB.playersByUuid
       ) as common.PlayerStateByUuid
     }
   }

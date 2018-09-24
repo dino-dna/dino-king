@@ -19,22 +19,15 @@ export type PlayerStateByUuid = {
   [uuid: number]: PlayerState
 }
 
-export type ServerPlayer = {
-  state: PlayerState
-  registration: PlayerRegistration
-}
-
 export type PlayerState = {
   characterType: CharacterType
-  playerBodyState: PlayerBodyState
+  gameId: number
   isAlive: boolean
   lastUpdateTime?: number
-}
-export type PlayerRegistration = {
+  playerBodyState: PlayerBodyState
+  teamId: TeamColor
+  teamPlayerId: number
   uuid: number
-  uid: number
-  tid: TeamColor
-  gid: number
 }
 
 export enum KingClientMessage {
@@ -47,11 +40,12 @@ export enum KingClientMessage {
 
 export enum KingServerMessage {
   ASSIGN_CHARACTER = 'ASSIGN_CHARACTER',
-  KILL_PLAYER = 'KILL_PLAYER',
-  SERVER_PLAYERS = 'SERVER_PLAYERS',
   HANDLE_NEW_PLAYER = 'HANDLE_NEW_PLAYER',
   HANDLE_PLAYER_DISCONNECTED = 'HANDLE_PLAYER_DISCONNECTED',
+  KILL_PLAYER = 'KILL_PLAYER',
+  PLAYER_REGISTRATIONS = 'PLAYER_REGISTRATIONS',
+  SERVER_PLAYERS = 'SERVER_PLAYERS',
+  TEARDOWN = 'TEARDOWN',
   UPDATE_GAME_STATE = 'UPDATE_GAME_STATE',
-  UPDATE_PLAYER_STATE = 'UPDATE_PLAYER_STATE',
-  TEARDOWN = 'TEARDOWN'
+  UPDATE_PLAYER_STATE = 'UPDATE_PLAYER_STATE'
 }

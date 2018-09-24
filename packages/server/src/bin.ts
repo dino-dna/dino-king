@@ -1,5 +1,5 @@
 import WebSocket = require('ws')
-import { KingClientMessage, KingServerMessage, ServerPlayer } from 'common'
+import { KingClientMessage, KingServerMessage, PlayerState } from 'common'
 import { Game } from './game'
 import { debounce } from 'lodash'
 import pino from 'pino'
@@ -17,7 +17,7 @@ wss.on('connection', onConnect)
 const gamesById: { [id: string]: Game } = {
   '1': new Game({ id: 1 })
 }
-const playerAndGameBySocket = new WeakMap<WebSocket, [ServerPlayer, Game]>()
+const playerAndGameBySocket = new WeakMap<WebSocket, [PlayerState, Game]>()
 
 // event handlers
 export function onConnect (ws: WebSocket) {
@@ -29,11 +29,7 @@ export function onClose (ws: WebSocket) {
   const res = playerAndGameBySocket.get(ws)
   if (!res) return console.warn('player not found for socket on close')
   const [player, game] = res
-  log.info(
-    `removing player ${player.registration.uid} from game ${
-      player.registration.gid
-    }`
-  )
+  log.info(`removing player ${player.uuid} from game ${player.gameId}`)
   game.removePlayer(player)
   broadcast(game, {
     type: KingServerMessage.HANDLE_PLAYER_DISCONNECTED,
@@ -54,16 +50,6 @@ export function onMessage (raw: string, ws: WebSocket) {
       payload: game.state
     })
   }
-  // setInterval(broadcastGameState, 5000)
-  const broadcastPlayers = (omittedSocket?: WebSocket) =>
-    broadcast(
-      game,
-      {
-        type: KingServerMessage.SERVER_PLAYERS,
-        payload: game.playerRegistrations
-      },
-      omittedSocket
-    )
   if (type === KingClientMessage.NEW_GAME) {
     // create game in gamesById
   } else if (type === KingClientMessage.REQUEST_CHARACTER) {
@@ -73,18 +59,11 @@ export function onMessage (raw: string, ws: WebSocket) {
     emit(
       {
         type: KingServerMessage.ASSIGN_CHARACTER,
-        payload: player
+        payload: player.uuid
       },
       ws
     )
-    broadcast(
-      game,
-      { type: KingServerMessage.HANDLE_NEW_PLAYER, payload: player },
-      ws
-    )
-    broadcastPlayers()
-  } else if (type === KingClientMessage.REQUEST_PLAYERS) {
-    broadcastPlayers()
+    broadcastGameState()
   } else if (type === KingClientMessage.PLAYER_BODY_STATE) {
     game.setPlayerState(playerAndGameBySocket.get(ws)![0], payload)
     broadcastGameState()
@@ -94,7 +73,7 @@ export function onMessage (raw: string, ws: WebSocket) {
     if (!killedPlayer) {
       return log.warn(`player ${killed} not found in game state`)
     }
-    killedPlayer.state.isAlive = false
+    killedPlayer.isAlive = false
     broadcast(
       game,
       {
@@ -111,11 +90,7 @@ export function onMessage (raw: string, ws: WebSocket) {
 // socket utils
 
 export const emit = (msg: object, ws: WebSocket) => ws.send(JSON.stringify(msg))
-export const broadcast = (
-  game: Game,
-  data: any,
-  omitSocket: WebSocket | null = null
-) => {
+export const broadcast = (game: Game, data: any, omitSocket: WebSocket | null = null) => {
   log.debug(Object.keys(game.state.playerStateByUuid).join(', '))
   const sent: Promise<void>[] = Array.from(wss.clients).map(ws => {
     if (omitSocket && ws === omitSocket) return Promise.resolve()

@@ -5,47 +5,43 @@ export interface NewTeamOptions {
   color: common.TeamColor
   gameId: number
   maxPlayers?: number
-  players: common.PlayerRegistration[]
+  players: common.PlayerState[]
 }
 export class Team {
   public color: common.TeamColor
   public gameId: number
   public maxPlayers: number
   public playerIdCounter: number
-  public playersRegistrations: common.PlayerRegistration[]
-  public playerStateByRegistration: WeakMap<
-    common.PlayerRegistration,
-    common.PlayerState
-  >
+  public players: common.PlayerState[]
+
   public static uuid: number = 0
 
   constructor (opts: NewTeamOptions) {
     this.color = opts.color
     this.gameId = opts.gameId
-    this.playersRegistrations = []
+    this.players = []
     this.maxPlayers = opts.maxPlayers || 5
-    this.playerStateByRegistration = new WeakMap()
     this.playerIdCounter = 0
   }
 
-  getPlayer (uuid: number): common.ServerPlayer | null {
-    const registration = this.playersRegistrations.find(
-      reg => reg.uuid === uuid
-    )
-    if (!registration) return null
-    return {
-      registration,
-      state: this.playerStateByRegistration.get(registration)!
-    }
+  getPlayer (uuid: number): common.PlayerState | null {
+    return this.players.find(reg => reg.uuid === uuid) || null
   }
 
   get isFull () {
-    return this.playersRegistrations.length >= this.maxPlayers
+    return this.players.length >= this.maxPlayers
   }
 
-  get registrationsById () {
-    return this.playersRegistrations.reduce((agg: any, reg) => {
-      agg[reg.uid] = reg
+  get playersById () {
+    return this.players.reduce((agg: any, reg) => {
+      agg[reg.teamPlayerId] = reg
+      return agg
+    }, {})
+  }
+
+  get playersByUuid () {
+    return this.players.reduce((agg: any, reg) => {
+      agg[reg.uuid] = reg
       return agg
     }, {})
   }
@@ -53,18 +49,11 @@ export class Team {
   registerPlayer () {
     if (this.isFull) throw new TeamFullError()
     ++Team.uuid
-    const regById = this.registrationsById
-    let playerId = 0
-    while (playerId in regById) ++playerId
-    const registration: common.PlayerRegistration = {
-      uuid: Team.uuid,
-      uid: playerId,
-      tid: this.color,
-      gid: this.gameId
-    }
-    this.playersRegistrations.push(registration)
-    const playerState: common.PlayerState = {
-      characterType: this.playersRegistrations.length ? 'peon' : 'king',
+    let teamPlayerId = 0
+    while (teamPlayerId in this.playersById) ++teamPlayerId
+    const player: common.PlayerState = {
+      characterType: this.players.length ? 'peon' : 'king',
+      gameId: this.gameId,
       isAlive: true,
       lastUpdateTime: Date.now(),
       playerBodyState: {
@@ -72,35 +61,17 @@ export class Team {
         acceleration: { x: 0, y: 0 },
         velocity: { x: 0, y: 0 },
         position: { x: 0, y: 0 }
-      }
+      },
+      teamId: this.color,
+      teamPlayerId,
+      uuid: Team.uuid
     }
-    this.playerStateByRegistration.set(registration, playerState)
-    const player: common.ServerPlayer = {
-      state: playerState,
-      registration
-    }
+    this.players.push(player)
     return player
   }
 
-  removePlayer (player: common.PlayerRegistration) {
-    const prevNumRegistrations = this.playersRegistrations.length
-    this.playersRegistrations = this.playersRegistrations.filter(
-      existing => player.uid !== existing.uid
-    )
-    if (prevNumRegistrations === this.playersRegistrations.length) {
-      throw new Error('failed to revome player from team')
-    }
-  }
-
-  get playerStatesByUuid () {
-    return this.playersRegistrations.reduce(
-      (agg: common.PlayerStateByUuid, reg) => {
-        let state = this.playerStateByRegistration.get(reg)
-        if (!state) throw new Error(`state for player ${reg.uuid} not found`)
-        agg[reg.uuid] = state
-        return agg
-      },
-      {}
-    )
+  removePlayer (player: common.PlayerState) {
+    const previousPlayerCount = this.players.length
+    this.players = this.players.filter(existing => player.teamPlayerId !== existing.teamPlayerId)
   }
 }
