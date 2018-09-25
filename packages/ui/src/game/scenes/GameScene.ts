@@ -162,7 +162,6 @@ export class GameScene extends Phaser.Scene {
     const characterTints = player.teamId === 'blue' ? TINTS.BLUE : TINTS.ORANGE
     character.setTint(...characterTints)
     this.characterGroup.add(character)
-    character.body.setCollideWorldBounds(true)
     this.tilesetLayers.forEach(layer => this.physics.add.collider(character, layer))
     this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
     if (isCurrentPlayer) {
@@ -245,6 +244,8 @@ export class GameScene extends Phaser.Scene {
     if (!this.track.isPlaying) this.track.play()
     if (this.player && this.player.body) {
       this.player.update()
+      this.physics.world.wrap(this.player, -20)
+
       const currentUserBodyState: BodyStateTuple = [
         this.player.body.position.x,
         this.player.body.position.y,
