@@ -1,17 +1,20 @@
-import WebSocket = require('ws')
-import { KingClientMessage, KingServerMessage, PlayerState } from 'common'
-import { Game } from './game'
 import { debounce } from 'lodash'
-import pino from 'pino'
+import { Game } from './game'
+import { KingClientMessage, KingServerMessage, PlayerState, DEATH_ANIMATION_DURATION } from 'common'
 import { promisify } from 'util'
+import pino from 'pino'
+import WebSocket = require('ws')
+
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 9999
 
 const log = pino({
   level: 'debug',
   prettyPrint: !!(process.env.NODE_ENV || 'production').match(/dev/i)
 })
 
-const wss = new WebSocket.Server({ path: '/api', port: 9999 })
+const wss = new WebSocket.Server({ path: '/api', port })
 wss.on('connection', onConnect)
+log.info(`listening on ${port}`)
 
 // state
 const gamesById: { [id: string]: Game } = {
@@ -74,14 +77,12 @@ export function onMessage (raw: string, ws: WebSocket) {
       return log.warn(`player ${killed} not found in game state`)
     }
     killedPlayer.isAlive = false
-    broadcast(
-      game,
-      {
-        type: KingServerMessage.KILL_PLAYER,
-        payload: { uuid: killed }
-      },
-      ws
-    )
+    if (killedPlayer.characterType === 'knight') killedPlayer.characterType = 'peon'
+    game.getPlayerTeam(killedPlayer).respawn({ delay: DEATH_ANIMATION_DURATION, player: killedPlayer })
+    broadcast(game, {
+      type: KingServerMessage.KILL_PLAYER,
+      payload: { uuid: killed }
+    })
   } else {
     throw new Error(`UNSUPPORTED MESSAGE: ${raw}`)
   }

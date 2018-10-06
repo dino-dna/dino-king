@@ -40,10 +40,13 @@ export class Team {
   }
 
   get playersByUuid () {
-    return this.players.reduce((agg: any, reg) => {
-      agg[reg.uuid] = reg
-      return agg
-    }, {})
+    return this.players.reduce(
+      (agg: common.PlayerStateByUuid, reg) => {
+        agg[reg.uuid] = reg
+        return agg
+      },
+      {} as common.PlayerStateByUuid
+    )
   }
 
   registerPlayer () {
@@ -73,5 +76,14 @@ export class Team {
   removePlayer (player: common.PlayerState) {
     const previousPlayerCount = this.players.length
     this.players = this.players.filter(existing => player.teamPlayerId !== existing.teamPlayerId)
+  }
+
+  respawn (opts: { delay: number; player: common.PlayerState }) {
+    const { delay, player } = opts
+    if (!this.playersByUuid[player.uuid]) throw new Error(`player uuid ${player.uuid} is not on this team!`)
+    setTimeout(() => {
+      const playerState = this.playersByUuid[player.uuid]
+      playerState.isAlive = true
+    }, delay)
   }
 }

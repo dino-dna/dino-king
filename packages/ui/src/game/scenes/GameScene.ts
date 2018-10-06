@@ -1,5 +1,12 @@
 import { Character } from '../Character'
-import { KingClientMessage, KingServerMessage, CentralGameState, PlayerStateByUuid, PlayerState } from 'common'
+import {
+  KingClientMessage,
+  KingServerMessage,
+  CentralGameState,
+  PlayerStateByUuid,
+  PlayerState,
+  DEATH_ANIMATION_DURATION
+} from 'common'
 import { TINTS } from '../pallette'
 import { EventEmitter } from 'events'
 import { GameMessages } from '../../interfaces'
@@ -181,11 +188,16 @@ export class GameScene extends Phaser.Scene {
   killPlayer (uuid: number) {
     const character = this.charactersByUuid.get(uuid)
     if (!character) return
+    character.disableInteractive()
+    character.body.setImmovable()
     character.animate('dead')
+    character.anims.setRepeat(0)
+    setTimeout(() => {
+      character.destroy()
+      this.charactersByUuid.delete(uuid)
+    }, DEATH_ANIMATION_DURATION)
     // @TODO prevent player from being interacted with.  essentially turn the Sprite into
     // animation only--remove all physics and interactivity from it!
-    character.destroy()
-    this.charactersByUuid.delete(uuid)
   }
 
   onMessage (data: any) {
@@ -303,6 +315,7 @@ export class GameScene extends Phaser.Scene {
     this.centralState = state
     for (let [uuid, character] of this.charactersByUuid.entries()) {
       let playerState = state.playerStateByUuid[uuid]
+      if (!playerState.isAlive) continue
       const targetX = playerState.playerBodyState.position.x
       const targetY = playerState.playerBodyState.position.y
       if (!playerState) {
@@ -328,7 +341,6 @@ export class GameScene extends Phaser.Scene {
       } else if (playerState.playerBodyState) {
         let vx = playerState.playerBodyState.velocity.x
         // if things are running fast, just move the character
-        console.log(character.body.position.x, targetX, character.body.position.y, targetY)
         if (character.body.position.x === targetX && character.body.position.y === targetY) {
           // no op
           console.log('player didnt move')
