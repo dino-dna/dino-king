@@ -1,67 +1,5 @@
 import { CharacterType } from 'common'
-
-type ICharacter = {
-  scene: Phaser.Scene
-  x: number
-  y: number
-  texture: string
-  frame?: string | integer
-  characterType: CharacterType
-}
-
-const KING_FRAME_META = {
-  walk: {
-    frames: 10
-  },
-  run: {
-    frames: 8
-  },
-  dead: {
-    frames: 8
-  },
-  idle: {
-    frames: 10
-  },
-  jump: {
-    frames: 12
-  }
-}
-
-const KNIGHT_FRAME_META = {
-  walk: {
-    frames: 10
-  },
-  run: {
-    frames: 10
-  },
-  dead: {
-    frames: 10
-  },
-  idle: {
-    frames: 10
-  },
-  jump: {
-    frames: 10
-  }
-}
-
-const PEON_FRAME_META = {
-  walk: {
-    frames: 10
-  },
-  run: {
-    frames: 10
-  },
-  dead: {
-    frames: 10
-  },
-  idle: {
-    frames: 10
-  },
-  jump: {
-    frames: 10
-  }
-}
+import { CharacterInitOptions } from '../../interfaces'
 
 const DEFAULT_ACCEL_Y = 500
 const DEFAULT_ACCEL_X = 600 * 2
@@ -76,7 +14,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   public tween: Phaser.Tweens.Tween
   public canFlap: boolean
 
-  constructor (params: ICharacter) {
+  constructor (params: CharacterInitOptions) {
     super(params.scene, params.x, params.y, params.texture, params.frame)
     this.cursors = this.scene.input.keyboard.createCursorKeys()
     params.scene.physics.world.enable(this)
@@ -94,28 +32,6 @@ export class Character extends Phaser.GameObjects.Sprite {
     params.scene.add.existing(this)
 
     this.onCharacterChange()
-  }
-
-  static createAnimations (scene: Phaser.Scene) {
-    ;[
-      { name: 'king', meta: KING_FRAME_META },
-      { name: 'knight', meta: KNIGHT_FRAME_META },
-      { name: 'peon', meta: PEON_FRAME_META }
-    ].forEach(({ name, meta }) => {
-      for (var type in meta as any) {
-        var frames = scene.anims.generateFrameNames(name, {
-          start: 1,
-          end: meta[type].frames,
-          prefix: `${type}/`
-        })
-        scene.anims.create({
-          key: `${name}_${type}`,
-          frames,
-          frameRate: 10,
-          repeat: -1
-        })
-      }
-    })
   }
 
   onCharacterChange () {

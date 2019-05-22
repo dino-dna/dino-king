@@ -1,3 +1,5 @@
+import { CharacterType } from 'common'
+
 export enum GameMessages {
   SocketError = 'SocketError',
   GameShutdown = 'GameShutdown'
@@ -26,3 +28,13 @@ export interface SocketErrorState {
 export type ErrorGameState = SocketErrorState
 export type OkGameState = RunningGameState | StartedGameState | StoppedGameState
 export type GameState = ErrorGameState | OkGameState
+
+export type CharacterInitOptions = {
+  // Phaser Sprint args, in object form
+  scene: Phaser.Scene
+  x: number
+  y: number
+  texture: string
+  frame?: string | integer
+  characterType: CharacterType
+}

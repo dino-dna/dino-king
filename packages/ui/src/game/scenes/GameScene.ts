@@ -25,7 +25,6 @@ export class GameScene extends Phaser.Scene {
   private characterGroup: Phaser.GameObjects.Group
   private bg: Phaser.Tilemaps.StaticTilemapLayer
   private bg_decor: Phaser.Tilemaps.StaticTilemapLayer
-  private map: Phaser.Tilemaps.Tilemap
   private platforms: Phaser.Tilemaps.StaticTilemapLayer
   private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
   private eventLogState: IEventLogState
@@ -34,8 +33,9 @@ export class GameScene extends Phaser.Scene {
   public charactersByUuid: Map<number, Character>
   public lastMessageEpochMs: number
   public lastUpdatePlayerBodyState: BodyStateTuple
+  public map: Phaser.Tilemaps.Tilemap
   public msBetweenMessages: number
-  public player: Character
+  public currentPlayer: Character
   public track: Phaser.Sound.BaseSound
   public ws: WebSocket
   public bus: EventEmitter
@@ -172,8 +172,8 @@ export class GameScene extends Phaser.Scene {
     this.tilesetLayers.forEach(layer => this.physics.add.collider(character, layer))
     this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
     if (isCurrentPlayer) {
-      this.player = character
-      this.cameras.main.startFollow(this.player, true, 0.05, 0.05)
+      this.currentPlayer = character
+      this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05)
     } else {
       // console.log('creating static character')
       // character.body.setImmovable(true)
@@ -254,17 +254,17 @@ export class GameScene extends Phaser.Scene {
 
   update () {
     if (!this.track.isPlaying) this.track.play()
-    if (this.player && this.player.body) {
-      this.player.update()
-      this.physics.world.wrap(this.player, -20)
+    if (this.currentPlayer && this.currentPlayer.body) {
+      this.currentPlayer.update()
+      this.physics.world.wrap(this.currentPlayer, -20)
 
       const currentUserBodyState: BodyStateTuple = [
-        this.player.body.position.x,
-        this.player.body.position.y,
-        this.player.body.velocity.x,
-        this.player.body.velocity.y,
-        this.player.body.acceleration.x,
-        this.player.body.acceleration.y
+        this.currentPlayer.body.position.x,
+        this.currentPlayer.body.position.y,
+        this.currentPlayer.body.velocity.x,
+        this.currentPlayer.body.velocity.y,
+        this.currentPlayer.body.acceleration.x,
+        this.currentPlayer.body.acceleration.y
       ]
       const isStateMatching = currentUserBodyState.every((v, i) => v === this.lastUpdatePlayerBodyState[i])
       if (!isStateMatching) {
@@ -336,7 +336,7 @@ export class GameScene extends Phaser.Scene {
       // have every call to this method call into it, so the debouce never actually
       // fires with a good connection.  when it does fire, all it does is set a flag
       // truthy, and the update loop catches it, and restarts the loopskie.
-      if (this.player === character) {
+      if (this.currentPlayer === character) {
         // don't update self from server.  be your own man
       } else if (playerState.playerBodyState) {
         let vx = playerState.playerBodyState.velocity.x
@@ -388,10 +388,10 @@ export class GameScene extends Phaser.Scene {
       JSON.stringify({
         type: KingClientMessage.PLAYER_BODY_STATE,
         payload: {
-          position: this.player.body.position,
-          velocity: this.player.body.velocity,
-          acceleration: this.player.body.acceleration,
-          currentAnimationName: this.player.currentAnimationName
+          position: this.currentPlayer.body.position,
+          velocity: this.currentPlayer.body.velocity,
+          acceleration: this.currentPlayer.body.acceleration,
+          currentAnimationName: this.currentPlayer.currentAnimationName
         }
       })
     )
