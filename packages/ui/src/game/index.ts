@@ -10,7 +10,7 @@ import * as gameScene from './scenes/GameScene'
 // let bears: Array<Bear> = []
 // let queens: Array<Queen> = []
 
-export const config: GameConfig = {
+export const config: Phaser.Types.Core.GameConfig = {
   backgroundColor: '#98d687',
   input: { keyboard: true },
   parent: 'game',
@@ -31,7 +31,7 @@ export const config: GameConfig = {
 }
 
 export class MurderKing extends Game {
-  constructor (config: GameConfig) {
+  constructor (config: Phaser.Types.Core.GameConfig) {
     super(config)
   }
 }
