@@ -1,4 +1,4 @@
-import { Game } from 'phaser'
+import Phaser, { Game } from 'phaser'
 import * as gameScene from './scenes/GameScene'
 
 // var walls
@@ -31,6 +31,7 @@ export const config: Phaser.Types.Core.GameConfig = {
 }
 
 export class MurderKing extends Game {
+  // eslint-disable-next-line
   constructor (config: Phaser.Types.Core.GameConfig) {
     super(config)
   }

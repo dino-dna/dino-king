@@ -1,5 +1,6 @@
 import { CharacterType } from 'common'
 import { CharacterInitOptions } from '../../interfaces'
+import Phaser from 'phaser'
 
 const DEFAULT_ACCEL_Y = 500
 const DEFAULT_ACCEL_X = 600 * 2
@@ -7,11 +8,11 @@ const DEFAULT_MAX_VELOCITY_X = 250
 
 export class Character extends Phaser.GameObjects.Sprite {
   private jumpKey: Phaser.Input.Keyboard.Key
-  public body: Phaser.Physics.Arcade.Body
+  public body!: Phaser.Physics.Arcade.Body
   public characterType: CharacterType
-  public currentAnimationName: string
+  public currentAnimationName!: string
   public cursors: Phaser.Types.Input.Keyboard.CursorKeys
-  public tween: Phaser.Tweens.Tween
+  public tween!: Phaser.Tweens.Tween
   public canFlap: boolean
 
   constructor (params: CharacterInitOptions) {

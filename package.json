@@ -1,34 +1,64 @@
 {
-  "name": "murder-king",
+  "name": "dino-king",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:cdaringe/murder-king.git",
+  "repository": "git@github.com:cdaringe/dino-king.git",
   "author": "cdaringe <christopher.dieringer@gmail.com>",
   "license": "MIT",
   "scripts": {
     "bootstrap": "yarn && lerna bootstrap",
     "format": "prettier-standard 'packages/**/src/**/*.ts' 'packages/**/src/**/*.tsx' 'packages/**/src/**/*.js'",
     "precommit": "lint-staged",
-    "lint": "echo 'skipping standard :('"
+    "lint": "standardx '{src,test,scripts}/**/*.{ts,tsx}' --fix"
   },
   "lint-staged": {
     "linters": {
       "packages/**/src/**/*.ts": [
         "prettier-standard",
+        "yarn lint",
         "git add"
       ],
       "packages/**/src/**/*.js": [
         "prettier-standard",
+        "yarn lint",
         "git add"
       ]
     }
   },
   "devDependencies": {
-    "husky": "^0.14.3",
-    "lerna": "^3.1.4",
-    "lint-staged": "^7.2.2",
-    "prettier-standard": "^8.0.1",
-    "standard": "^11.0.1",
-    "typescript": "^3.0.1"
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
+    "husky": "^2.4.1",
+    "lerna": "^3.15.0",
+    "lint-staged": "^8.2.1",
+    "prettier-standard": "^9.1.1",
+    "standardx": "^3.0.1",
+    "typescript": "^3.5.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "eslintConfig": {
+    "rules": {
+      "no-unused-vars": 0
+    }
+  },
+  "standardx": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint/eslint-plugin"
+    ],
+    "env": [
+      "browser",
+      "node"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "off"
+    },
+    "ignore": [
+      "**/*.d.ts"
+    ]
   }
 }

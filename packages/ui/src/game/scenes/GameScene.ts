@@ -1,4 +1,4 @@
-import { Character } from '../Character'
+import { Character } from '../character/Character'
 import {
   KingClientMessage,
   KingServerMessage,
@@ -7,9 +7,11 @@ import {
   PlayerState,
   DEATH_ANIMATION_DURATION
 } from 'common'
+import Phaser from 'phaser'
 import { TINTS } from '../pallette'
 import { EventEmitter } from 'events'
 import { GameMessages } from '../../interfaces'
+import { animate } from 'game/character/animations'
 
 export const TARGET_WIDTH = 1792
 export const TARGET_HEIGTH = 1008
@@ -22,24 +24,24 @@ export interface IEventLogState {
 }
 
 export class GameScene extends Phaser.Scene {
-  private characterGroup: Phaser.GameObjects.Group
-  private bg: Phaser.Tilemaps.StaticTilemapLayer
-  private bg_decor: Phaser.Tilemaps.StaticTilemapLayer
-  private platforms: Phaser.Tilemaps.StaticTilemapLayer
-  private tilesetLayers: Phaser.Tilemaps.StaticTilemapLayer[]
+  private characterGroup!: Phaser.GameObjects.Group
+  private bg!: Phaser.Tilemaps.StaticTilemapLayer
+  private bgDecor!: Phaser.Tilemaps.StaticTilemapLayer
+  private platforms!: Phaser.Tilemaps.StaticTilemapLayer
+  private tilesetLayers!: Phaser.Tilemaps.StaticTilemapLayer[]
   private eventLogState: IEventLogState
 
-  public centralState: CentralGameState
+  public centralState!: CentralGameState
   public charactersByUuid: Map<number, Character>
   public lastMessageEpochMs: number
   public lastUpdatePlayerBodyState: BodyStateTuple
-  public map: Phaser.Tilemaps.Tilemap
+  public map!: Phaser.Tilemaps.Tilemap
   public msBetweenMessages: number
-  public currentPlayer: Character
-  public track: Phaser.Sound.BaseSound
-  public ws: WebSocket
+  public currentPlayer!: Character
+  public track!: Phaser.Sound.BaseSound
+  public ws!: WebSocket
   public bus: EventEmitter
-  public uuid: number
+  public uuid!: number
 
   constructor () {
     super({
@@ -58,7 +60,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   listen () {
-    this.ws = new WebSocket(`ws://${location.host}/api`)
+    this.ws = new WebSocket(`ws://${window.location.host}/api`)
     const ws = this.ws
     const gid = window.sessionStorage.getItem('gameId')
     const tid = window.sessionStorage.getItem('teamId')
@@ -122,16 +124,16 @@ export class GameScene extends Phaser.Scene {
   create () {
     this.track = this.sound.add('1')
     this.track.play()
-    Character.createAnimations(this)
+    animate(this)
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     const map = this.make.tilemap({ key: 'map' })
     this.map = map
     const tileset = map.addTilesetImage('tileset', 'tileset')
     this.bg = map.createStaticLayer('bg', tileset, 0, 0)
-    this.bg_decor = map.createStaticLayer('bg_decor', tileset, 0, 0)
+    this.bgDecor = map.createStaticLayer('bg_decor', tileset, 0, 0)
     this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
-    this.tilesetLayers = [this.bg, this.bg_decor, this.platforms]
+    this.tilesetLayers = [this.bg, this.bgDecor, this.platforms]
     this.tilesetLayers.forEach(layer => {
       // const debugGraphics = this.add.graphics().setAlpha(0.75)
       // layer.renderDebug(debugGraphics, {
@@ -238,8 +240,8 @@ export class GameScene extends Phaser.Scene {
     // @TODO improve kill conditions!
     if (topPlayerBottomY <= bottomPlayerTopY) {
       const currentCharacters = Array.from(this.charactersByUuid.entries())
-      const [topId, _] = currentCharacters.find(([_, character]) => character.body === topPlayerBody)
-      const [bottomId, __] = currentCharacters.find(([_, character]) => character.body === bottomPlayerBody)
+      const [topId, _] = currentCharacters.find(([_, character]) => character.body === topPlayerBody) // eslint-disable-line
+      const [bottomId, __] = currentCharacters.find(([_, character]) => character.body === bottomPlayerBody) // eslint-disable-line
       this.ws.send(
         JSON.stringify({
           type: KingClientMessage.KILL_PLAYER,
