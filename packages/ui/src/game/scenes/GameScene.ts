@@ -196,8 +196,8 @@ export class GameScene extends Phaser.Scene {
       character.destroy()
       this.charactersByUuid.delete(uuid)
     }, DEATH_ANIMATION_DURATION)
-    // @TODO prevent player from being interacted with.  essentially turn the Sprite into
-    // animation only--remove all physics and interactivity from it!
+    character.body.setImmovable(true)
+    character.body.checkCollision.none = true
   }
 
   onMessage (data: any) {
