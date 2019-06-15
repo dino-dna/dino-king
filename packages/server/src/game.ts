@@ -1,8 +1,10 @@
 import * as common from 'common'
 import { Team } from './team'
+import pino from 'pino'
 
 export type GameOptions = {
   id: number
+  log: pino.Logger
 }
 
 export class Game {
@@ -11,11 +13,14 @@ export class Game {
   public maxPlayersPerTeam: number
   public id: number
   public playerStateChangeCounter: number = 0
+  public log: pino.Logger
 
   constructor (opts: GameOptions) {
     this.id = opts.id
     this.maxPlayersPerTeam = 5
+    this.log = opts.log
     this.teamA = new Team({
+      log: opts.log,
       color: 'blue',
       gameId: this.id,
       maxPlayers: this.maxPlayersPerTeam,
@@ -24,6 +29,7 @@ export class Game {
     this.teamB = new Team({
       color: 'orange',
       gameId: this.id,
+      log: opts.log,
       maxPlayers: this.maxPlayersPerTeam,
       players: []
     })

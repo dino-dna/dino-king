@@ -1,15 +1,19 @@
 import * as common from 'common'
 import { TeamFullError } from './errors'
+import pino from 'pino'
+import bluebird from 'bluebird'
 
 export interface NewTeamOptions {
   color: common.TeamColor
   gameId: number
   maxPlayers?: number
   players: common.PlayerState[]
+  log: pino.Logger
 }
 export class Team {
   public color: common.TeamColor
   public gameId: number
+  public log: pino.Logger
   public maxPlayers: number
   public playerIdCounter: number
   public players: common.PlayerState[]
@@ -22,6 +26,7 @@ export class Team {
     this.players = []
     this.maxPlayers = opts.maxPlayers || 5
     this.playerIdCounter = 0
+    this.log = opts.log
   }
 
   getPlayer (uuid: number): common.PlayerState | null {
@@ -78,12 +83,12 @@ export class Team {
     this.players = this.players.filter(existing => player.teamPlayerId !== existing.teamPlayerId)
   }
 
-  respawn (opts: { delay: number; player: common.PlayerState }) {
+  async respawn (opts: { delay: number; player: common.PlayerState }) {
     const { delay, player } = opts
     if (!this.playersByUuid[player.uuid]) throw new Error(`player uuid ${player.uuid} is not on this team!`)
-    setTimeout(() => {
-      const playerState = this.playersByUuid[player.uuid]
-      playerState.isAlive = true
-    }, delay)
+    await bluebird.delay(delay)
+    const playerState = this.playersByUuid[player.uuid]
+    playerState.isAlive = true
+    return this.log.info(`player ${player.uuid} is respawning`)
   }
 }

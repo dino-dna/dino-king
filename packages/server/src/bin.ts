@@ -1,7 +1,6 @@
 import { debounce } from 'lodash'
 import { Game } from './game'
 import { KingClientMessage, KingServerMessage, PlayerState, DEATH_ANIMATION_DURATION } from 'common'
-import { promisify } from 'util'
 import pino from 'pino'
 import WebSocket = require('ws')
 
@@ -18,7 +17,7 @@ log.info(`listening on ${port}`)
 
 // state
 const gamesById: { [id: string]: Game } = {
-  '1': new Game({ id: 1 })
+  '1': new Game({ id: 1, log })
 }
 const playerAndGameBySocket = new WeakMap<WebSocket, [PlayerState, Game]>()
 
@@ -78,10 +77,16 @@ export function onMessage (raw: string, ws: WebSocket) {
     }
     killedPlayer.isAlive = false
     if (killedPlayer.characterType === 'knight') killedPlayer.characterType = 'peon'
-    game.getPlayerTeam(killedPlayer).respawn({ delay: DEATH_ANIMATION_DURATION, player: killedPlayer })
+    const respawnedP = game
+      .getPlayerTeam(killedPlayer)
+      .respawn({ delay: DEATH_ANIMATION_DURATION, player: killedPlayer })
     broadcast(game, {
       type: KingServerMessage.KILL_PLAYER,
       payload: { uuid: killed }
+    })
+    respawnedP.then(() => {
+      ++game.playerStateChangeCounter
+      broadcastGameState()
     })
   } else {
     throw new Error(`UNSUPPORTED MESSAGE: ${raw}`)
