@@ -41,9 +41,9 @@ export function onClose (ws: WebSocket) {
 
 export function onMessage (raw: string, ws: WebSocket) {
   const message = JSON.parse(raw)
-  let game = gamesById['1'] // @TODO, i dont know. support many games?
+  let game = gamesById['1']
   const { type, payload } = message
-  log.info(raw)
+  log.trace(raw)
 
   const broadcastGameState = () => {
     if (!game) return
@@ -75,6 +75,9 @@ export function onMessage (raw: string, ws: WebSocket) {
     if (!killedPlayer) {
       return log.warn(`player ${killed} not found in game state`)
     }
+    if (!killedPlayer.isAlive) {
+      return log.warn(`played killed twice--omitting kill event`)
+    }
     killedPlayer.isAlive = false
     if (killedPlayer.characterType === 'knight') killedPlayer.characterType = 'peon'
     const respawnedP = game
@@ -84,6 +87,7 @@ export function onMessage (raw: string, ws: WebSocket) {
       type: KingServerMessage.KILL_PLAYER,
       payload: { uuid: killed }
     })
+    broadcastGameState()
     respawnedP.then(() => {
       ++game.playerStateChangeCounter
       broadcastGameState()
@@ -102,8 +106,8 @@ export const broadcast = (game: Game, data: any, omitSocket: WebSocket | null = 
     if (omitSocket && ws === omitSocket) return Promise.resolve()
     const res = playerAndGameBySocket.get(ws)
     if (!res || res[1] !== game) return Promise.resolve()
-    return new Promise((res, rej) => {
-      ws.send(JSON.stringify(data), err => (err ? rej(err) : res()))
+    return new Promise((resolve, reject) => {
+      ws.send(JSON.stringify(data), err => (err ? reject(err) : resolve()))
     })
   })
   return Promise.all(sent)

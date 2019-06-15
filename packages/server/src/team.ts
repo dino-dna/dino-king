@@ -3,6 +3,19 @@ import { TeamFullError } from './errors'
 import pino from 'pino'
 import bluebird from 'bluebird'
 
+const mapJson = require('./resources/map.json')
+const mapSpawnPoints: { x: number; y: number }[] = mapJson.layers
+  .find((layer: any) => layer.name === 'spawns')
+  .objects.sort((a: any, b: any) => (parseInt(a.name) < parseInt(b.name) ? -1 : 1))
+  .map((layer: any) => ({ x: layer.x, y: layer.y }))
+if (!mapSpawnPoints || !mapSpawnPoints.length) {
+  throw new Error('failed to find spawn points for characters in map')
+}
+
+export interface GetSpawnPointOptions {
+  color: common.TeamColor
+  teamPlayerId: number
+}
 export interface NewTeamOptions {
   color: common.TeamColor
   gameId: number
@@ -10,6 +23,7 @@ export interface NewTeamOptions {
   players: common.PlayerState[]
   log: pino.Logger
 }
+
 export class Team {
   public color: common.TeamColor
   public gameId: number
@@ -29,8 +43,24 @@ export class Team {
     this.log = opts.log
   }
 
+  public static getSpawnPoint ({ color, teamPlayerId }: GetSpawnPointOptions): { x: number; y: number } {
+    const point = mapSpawnPoints[color === 'blue' ? teamPlayerId : teamPlayerId + 5]
+    if (!point) throw new Error('unable to find spawn point')
+    return point
+  }
+
   getPlayer (uuid: number): common.PlayerState | null {
     return this.players.find(reg => reg.uuid === uuid) || null
+  }
+
+  public static getInitialPlayerBodyState ({ color, teamPlayerId }: GetSpawnPointOptions): common.PlayerBodyState {
+    const { x, y } = Team.getSpawnPoint({ color, teamPlayerId })
+    return {
+      currentAnimationName: '__init__',
+      acceleration: { x: 0, y: 0 },
+      velocity: { x: 0, y: 0 },
+      position: { x, y }
+    }
   }
 
   get isFull () {
@@ -64,12 +94,7 @@ export class Team {
       gameId: this.gameId,
       isAlive: true,
       lastUpdateTime: Date.now(),
-      playerBodyState: {
-        currentAnimationName: '__init__',
-        acceleration: { x: 0, y: 0 },
-        velocity: { x: 0, y: 0 },
-        position: { x: 0, y: 0 }
-      },
+      playerBodyState: Team.getInitialPlayerBodyState({ color: this.color, teamPlayerId }),
       teamId: this.color,
       teamPlayerId,
       uuid: Team.uuid
@@ -88,6 +113,10 @@ export class Team {
     if (!this.playersByUuid[player.uuid]) throw new Error(`player uuid ${player.uuid} is not on this team!`)
     await bluebird.delay(delay)
     const playerState = this.playersByUuid[player.uuid]
+    playerState.playerBodyState = Team.getInitialPlayerBodyState({
+      color: this.color,
+      teamPlayerId: player.teamPlayerId
+    })
     playerState.isAlive = true
     return this.log.info(`player ${player.uuid} is respawning`)
   }

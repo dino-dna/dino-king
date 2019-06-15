@@ -154,14 +154,10 @@ export class GameScene extends Phaser.Scene {
     if (existingPlayer) {
       return console.log(`player uuid: ${player.uuid} exists, skipping`)
     }
-    const spawnPoint = this.map.findObject(
-      'spawns',
-      obj => obj.name === `${player.teamId === 'blue' ? player.teamPlayerId : player.teamPlayerId + 5}`
-    )
     const character = new Character({
       scene: this,
-      x: (spawnPoint as any).x,
-      y: (spawnPoint as any).y,
+      x: player.playerBodyState.position.x,
+      y: player.playerBodyState.position.y,
       texture: player.characterType,
       frame: 'idle/1',
       characterType: player.characterType

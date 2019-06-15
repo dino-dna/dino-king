@@ -5,12 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "server - bin",
       "type": "node",
       "request": "launch",
-      "name": "server",
-      "program": "${workspaceFolder}/src/bin.ts",
-      "outFiles": [
-        "${workspaceFolder}/build/*.js"
+      "args": ["${workspaceFolder}/src/bin.ts"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "skipFiles": [
+        "<node_internals>/**/*.js"
       ]
     }
   ]

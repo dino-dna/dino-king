@@ -4,11 +4,13 @@
   "main": "build/bin.js",
   "license": "MIT",
   "scripts": {
+    "prestart": "ts-node scripts/map.ts",
     "start:compiler": "tsc -w",
     "start:server": "nodemon node build/bin.js",
     "start": "run-p start:*"
   },
   "dependencies": {
+    "perish":"^1.0.2",
     "common": "^0.0.1",
     "bluebird": "^3.5.5",
     "lodash":"^4.17.11",
@@ -18,11 +20,14 @@
   },
   "devDependencies": {
     "@types/bluebird":"^3.5.27",
+    "@types/fs-extra":"^7.0.0",
     "@types/lodash":"^4.14.134",
     "@types/pino":"^5.8.8",
     "@types/ws":"^6.0.1",
+    "fs-extra":"^8.0.1",
     "nodemon":"^1.19.1",
     "npm-run-all":"^4.1.5",
-    "typescript":"^3.5.2"
+    "typescript":"^3.5.2",
+    "ts-node":"^8.3.0"
   }
 }
