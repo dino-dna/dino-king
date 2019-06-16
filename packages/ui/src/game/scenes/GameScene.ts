@@ -172,12 +172,6 @@ export class GameScene extends Phaser.Scene {
     if (isCurrentPlayer) {
       this.currentPlayer = character
       this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05)
-    } else {
-      // console.log('creating static character')
-      // character.body.setImmovable(true)
-      // character.body.setGravity(0, 0)
-      // character.body.allowGravity = false
-      // character.body.enable = false
     }
     this.charactersByUuid.set(player.uuid, character)
     console.log(`created player [current player: ${isCurrentPlayer}]: ${player.uuid}`)
@@ -306,9 +300,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   updateRemoteControlledGameState (state: CentralGameState) {
-    if (!this.centralState || state.playerStateChangeCounter !== this.centralState.playerStateChangeCounter) {
-      this.configurePlayers(state.playerStateByUuid)
-    }
+    // if (!this.centralState) { //  || state.playerStateChangeCounter !== this.centralState.playerStateChangeCounter
+    // }
+    this.configurePlayers(state.playerStateByUuid)
     this.centralState = state
     for (let [uuid, character] of this.charactersByUuid.entries()) {
       let playerState = state.playerStateByUuid[uuid]
