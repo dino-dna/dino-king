@@ -168,7 +168,7 @@ export class GameScene extends Phaser.Scene {
     character.setTint(...characterTints)
     this.characterGroup.add(character)
     this.tilesetLayers.forEach(layer => this.physics.add.collider(character, layer))
-    this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
+    if (isCurrentPlayer) this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
     if (isCurrentPlayer) {
       this.currentPlayer = character
       this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05)
@@ -222,6 +222,18 @@ export class GameScene extends Phaser.Scene {
   onPlayersCollide (player1Object: Phaser.GameObjects.GameObject, player2Object: Phaser.GameObjects.GameObject) {
     const player1Body = player1Object.body as Phaser.Physics.Arcade.Body
     const player2Body = player2Object.body as Phaser.Physics.Arcade.Body
+    let player1Id, player2Id
+    for (const [id, character] of this.charactersByUuid.entries()) {
+      if (character === player1Object) player1Id = id
+      else if (character === player2Object) player2Id = id
+      if (player1Id && player2Id) break
+    }
+    const player1State = this.centralState.playerStateByUuid[player1Id]
+    const player2State = this.centralState.playerStateByUuid[player2Id]
+    if (!player1State || !player2State) {
+      return console.error('unknown players collided wtf')
+    }
+    if (player1State.teamId === player2State.teamId) return
     const topPlayerBody = player1Body.y < player2Body.y ? player1Body : player2Body
     const bottomPlayerBody = topPlayerBody === player1Body ? player2Body : player1Body
     const topPlayerBottomY = topPlayerBody.y + topPlayerBody.halfHeight
