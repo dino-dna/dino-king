@@ -4,6 +4,7 @@
   "main": "src/bin.ts",
   "license": "MIT",
   "scripts": {
+    "clean": "del 'src/*.{js,map}'",
     "prestart": "ts-node scripts/map.ts",
     "start:compiler": "tsc -w",
     "start:server": "nodemon -x ts-node src/bin.ts",
@@ -19,6 +20,7 @@
     "ws":"^7.0.0"
   },
   "devDependencies": {
+    "del-cli":"^2.0.0",
     "@types/bluebird":"^3.5.27",
     "@types/fs-extra":"^7.0.0",
     "@types/lodash":"^4.14.134",
