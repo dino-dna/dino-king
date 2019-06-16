@@ -168,8 +168,8 @@ export class GameScene extends Phaser.Scene {
     character.setTint(...characterTints)
     this.characterGroup.add(character)
     this.tilesetLayers.forEach(layer => this.physics.add.collider(character, layer))
-    if (isCurrentPlayer) this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
     if (isCurrentPlayer) {
+      this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this))
       this.currentPlayer = character
       this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05)
     }
