@@ -54,6 +54,9 @@ export class Character extends Phaser.GameObjects.Sprite {
   }
 
   private handleInput (): void {
+    if (this.body.immovable) {
+      return
+    }
     if (!this.body) {
       console.warn('character body not yet created?')
       return

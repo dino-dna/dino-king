@@ -1,12 +1,12 @@
 {
   "name": "dino-king-server",
   "version": "0.0.1",
-  "main": "build/bin.js",
+  "main": "src/bin.ts",
   "license": "MIT",
   "scripts": {
     "prestart": "ts-node scripts/map.ts",
     "start:compiler": "tsc -w",
-    "start:server": "nodemon node build/bin.js",
+    "start:server": "nodemon -x ts-node src/bin.ts",
     "start": "run-p start:*"
   },
   "dependencies": {

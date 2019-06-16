@@ -188,14 +188,13 @@ export class GameScene extends Phaser.Scene {
     if (!character) return
     character.disableInteractive()
     character.body.setImmovable()
+    character.body.checkCollision.none = true
     character.animate('dead')
     character.anims.setRepeat(0)
     setTimeout(() => {
       character.destroy()
       this.charactersByUuid.delete(uuid)
     }, DEATH_ANIMATION_DURATION)
-    character.body.setImmovable(true)
-    character.body.checkCollision.none = true
   }
 
   onMessage (data: any) {
