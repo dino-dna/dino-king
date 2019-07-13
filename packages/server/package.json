@@ -6,9 +6,9 @@
   "scripts": {
     "build:map": "ts-node scripts/map.ts",
     "clean": "del '{src,scripts}/**/*.{map,js}'",
-    "prestart": "run-p build:map clean",
-    "start:compiler": "tsc -w",
-    "start:server": "nodemon node src/bin.js",
+    "prestart": "run-p clean build:map",
+    "start:compiler": "tsc -w --preserveWatchOutput",
+    "start:server": "nodemon src/bin.js",
     "start": "run-p start:*"
   },
   "dependencies": {
