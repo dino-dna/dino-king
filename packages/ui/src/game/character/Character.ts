@@ -40,6 +40,10 @@ export class Character extends Phaser.GameObjects.Sprite {
       this.body.setSize(80, 110)
       this.body.setOffset(25, 15)
       this.setScale(0.5, 0.5)
+    } else if (this.characterType === 'peon') {
+      this.body.setSize(50, 90)
+      this.body.setOffset(16, 20)
+      this.setScale(0.6, 0.6)
     }
   }
 
@@ -55,6 +59,9 @@ export class Character extends Phaser.GameObjects.Sprite {
   }
 
   private handleInput (): void {
+    if (this.body.immovable) {
+      return
+    }
     if (!this.body) {
       console.warn('character body not yet created?')
       return

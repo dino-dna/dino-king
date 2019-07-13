@@ -87,6 +87,7 @@ export function onMessage (raw: string, ws: WebSocket) {
       type: KingServerMessage.KILL_PLAYER,
       payload: { uuid: killed }
     })
+    ++game.playerStateChangeCounter
     broadcastGameState()
     respawnedP.then(() => {
       ++game.playerStateChangeCounter

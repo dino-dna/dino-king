@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build:map": "ts-node scripts/map.ts",
-    "clean": "del '{src,scripts}/**/*.js'",
+    "clean": "del '{src,scripts}/**/*.{map,js}'",
     "prestart": "run-p build:map clean",
     "start:compiler": "tsc -w",
     "start:server": "nodemon node src/bin.js",
@@ -21,6 +21,7 @@
     "ws":"^7.0.0"
   },
   "devDependencies": {
+    "del-cli":"^2.0.0",
     "@types/bluebird":"^3.5.27",
     "@types/fs-extra":"^7.0.0",
     "@types/lodash":"^4.14.134",
