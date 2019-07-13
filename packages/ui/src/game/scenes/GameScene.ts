@@ -185,8 +185,11 @@ export class GameScene extends Phaser.Scene {
 
   killPlayer (uuid: number) {
     const character = this.charactersByUuid.get(uuid)
-    if (!character) return
+    if (!character) {
+      return console.log(`unable to find player: ${uuid}`)
+    }
     character.disableInteractive()
+    character.body.acceleration.x = 0
     character.body.setImmovable()
     character.animate('dead')
     character.anims.setRepeat(0)

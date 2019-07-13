@@ -1,2 +1,3 @@
 build
 src/resources/map.json
+*.map

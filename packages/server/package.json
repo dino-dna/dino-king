@@ -1,12 +1,14 @@
 {
   "name": "dino-king-server",
   "version": "0.0.1",
-  "main": "build/bin.js",
+  "main": "src/bin.js",
   "license": "MIT",
   "scripts": {
-    "prestart": "ts-node scripts/map.ts",
+    "build:map": "ts-node scripts/map.ts",
+    "clean": "del '{src,scripts}/**/*.js'",
+    "prestart": "run-p build:map clean",
     "start:compiler": "tsc -w",
-    "start:server": "nodemon node build/bin.js",
+    "start:server": "nodemon node src/bin.js",
     "start": "run-p start:*"
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "nodemon":"^1.19.1",
     "npm-run-all":"^4.1.5",
     "typescript":"^3.5.2",
-    "ts-node":"^8.3.0"
+    "ts-node":"^8.3.0",
+    "del-cli":"~2.0.0"
   }
 }

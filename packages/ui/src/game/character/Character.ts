@@ -44,6 +44,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   }
 
   update (): void {
+    if (this.body.immovable) return
     this.handleInput()
   }
 
