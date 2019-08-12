@@ -5,7 +5,7 @@
 - `nvm` - install node
 - `yarn bootstrap` - install & link deps
 
-## components
+## run components
 
 - `server` - game server to coordinate games and game state
 - `ui` - a browser game application
