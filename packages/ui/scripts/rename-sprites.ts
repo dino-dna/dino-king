@@ -1,4 +1,4 @@
-const fs = require('fs-extra')
+import fs = require('fs-extra')
 const { basename, resolve } = require('path')
 const dirname = process.argv[2]
 

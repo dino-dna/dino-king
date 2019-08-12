@@ -45,7 +45,9 @@ export class App extends React.Component<any, IAppState> {
     )
   }
   public render () {
-    const { gameState: { type, error } } = this.state
+    const {
+      gameState: { type, error }
+    } = this.state
     const isGameRunning = !error && type !== 'Stopped'
     const gameStateClassNames = cx('game-state__pane', {
       'game-state__pane--visible': isGameRunning

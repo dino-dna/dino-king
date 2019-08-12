@@ -38,3 +38,40 @@ export type CharacterInitOptions = {
   frame?: string | integer
   characterType: CharacterType
 }
+
+export interface CharacterSprite {
+  textures: SpriteTexture[]
+}
+
+export interface SpriteTexture {
+  image: string
+  format: string
+  size: {
+    w: number
+    h: number
+  }
+  scale: number
+  frames: SpriteFrame[]
+}
+
+export interface SpriteFrame {
+  filename: string
+  rotated: boolean
+  trimmed: boolean
+  sourceSize: {
+    w: number
+    h: number
+  }
+  spriteSourceSize: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
+  frame: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
+}
