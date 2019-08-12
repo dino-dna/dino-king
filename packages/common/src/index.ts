@@ -1,3 +1,4 @@
+export * from './errors'
 export type TeamColor = 'blue' | 'orange'
 
 export type CentralGameState = {

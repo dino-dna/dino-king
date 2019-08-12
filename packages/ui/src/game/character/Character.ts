@@ -1,6 +1,7 @@
-import { CharacterType } from 'common'
+import { CharacterType, UnreachableCaseError } from 'common'
 import { CharacterInitOptions } from '../../interfaces'
 import Phaser from 'phaser'
+import { SpriteSheets } from './frames'
 
 const DEFAULT_ACCEL_Y = 500
 const DEFAULT_ACCEL_X = 600 * 2
@@ -15,8 +16,20 @@ export class Character extends Phaser.GameObjects.Sprite {
   public tween!: Phaser.Tweens.Tween
   public canFlap: boolean
 
+  public static getInitialFrame (characterType: CharacterType) {
+    switch (characterType) {
+      case 'king':
+      case 'knight':
+      case 'peon':
+        return `${characterType}/idle/1`
+      default:
+        throw new UnreachableCaseError(characterType)
+    }
+  }
+
   constructor (params: CharacterInitOptions) {
-    super(params.scene, params.x, params.y, params.texture, params.frame)
+    const { characterType } = params
+    super(params.scene, params.x, params.y, SpriteSheets.CHARACTERS.name, Character.getInitialFrame(characterType))
     this.cursors = this.scene.input.keyboard.createCursorKeys()
     params.scene.physics.world.enable(this)
     this.body.gravity.y = DEFAULT_ACCEL_Y
@@ -25,25 +38,21 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.body.setFriction(0.7, 0)
     this.characterType = params.characterType
     this.canFlap = true
-
     this.body.setBounce(0, 0)
 
     // input
     this.jumpKey = params.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     params.scene.add.existing(this)
-
     this.onCharacterChange()
   }
-
   onCharacterChange () {
     if (this.characterType === 'king') {
-      this.body.setSize(80, 110)
-      this.body.setOffset(25, 15)
-      this.setScale(0.5, 0.5)
+      // this.body.setSize(80 / 2, 110 / 2)
+      // this.body.setOffset(12, -5)
     } else if (this.characterType === 'peon') {
       this.body.setSize(50, 90)
       this.body.setOffset(16, 20)
-      this.setScale(0.6, 0.6)
+      // this.setScale(0.6, 0.6)
     }
   }
 
@@ -55,7 +64,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   public animate (key: string) {
     if (this.currentAnimationName === key) return
     this.currentAnimationName = key
-    this.anims.play(`${this.characterType}_${key}`, true)
+    this.anims.play(`${this.characterType}/${key}`, true)
   }
 
   private handleInput (): void {

@@ -3,6 +3,17 @@ export type StateFrameCountMap = {
     frames: number
   }
 }
+
+export const SpriteSheets = {
+  CHARACTERS: {
+    name: 'characters',
+    file: 'sprites-characters.json'
+  },
+  MISC: {
+    name: 'misc',
+    file: 'sprites-no-scaling.json'
+  }
+}
 export const KING: StateFrameCountMap = {
   walk: {
     frames: 10

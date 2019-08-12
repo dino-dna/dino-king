@@ -16,8 +16,6 @@ export function create (opts: CreatePlayerOpts) {
     scene,
     x: (spawnPoint as any).x,
     y: (spawnPoint as any).y,
-    texture: player.characterType,
-    frame: 'idle/1',
     characterType: player.characterType
   })
   character.animate('idle')

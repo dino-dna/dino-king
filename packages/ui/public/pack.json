@@ -23,8 +23,8 @@
       },
       {
         "type": "image",
-        "key": "tileset",
-        "url": "tileset.png"
+        "key": "terrain",
+        "url": "terrain.png"
       }
     ]
   }
