@@ -16,7 +16,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   public canFlap: boolean
 
   constructor (params: CharacterInitOptions) {
-    super(params.scene, params.x, params.y, params.texture, params.frame)
+    super(params.scene, params.x, params.y, 'sprites' /* params.texture */, params.frame)
     this.cursors = this.scene.input.keyboard.createCursorKeys()
     params.scene.physics.world.enable(this)
     this.body.gravity.y = DEFAULT_ACCEL_Y

@@ -104,9 +104,7 @@ export class GameScene extends Phaser.Scene {
     this.load
       .pack('preload', './pack.json', 'preload')
       .tilemapTiledJSON('map', 'map.json')
-      .multiatlas('king', 'characters/king.json', 'characters')
-      .multiatlas('knight', 'characters/knight.json', 'characters')
-      .multiatlas('peon', 'characters/peon.json', 'characters')
+      .multiatlas('sprites', 'sprites.json')
   }
 
   configurePlayers (playersByUuid: PlayerStateByUuid) {
@@ -127,12 +125,14 @@ export class GameScene extends Phaser.Scene {
     animate(this)
     this.cameras.main.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
     this.physics.world.setBounds(0, 0, TARGET_WIDTH, TARGET_HEIGTH)
-    const map = this.make.tilemap({ key: 'map' })
-    this.map = map
-    const tileset = map.addTilesetImage('tileset', 'tileset')
-    this.bg = map.createStaticLayer('bg', tileset, 0, 0)
-    this.bgDecor = map.createStaticLayer('bg_decor', tileset, 0, 0)
-    this.platforms = map.createStaticLayer('platforms', tileset, 0, 0)
+    // @TODO - OBSERVE IT WORKS HACKS!
+    this.add.sprite(400, 10, 'sprites', 'king/idle/1.png')
+
+    const map = (this.map = this.make.tilemap({ key: 'map' }))
+    const terrain = map.addTilesetImage('terrain', 'terrain')
+    this.bg = map.createStaticLayer('bg', terrain, 0, 0)
+    this.bgDecor = map.createStaticLayer('bg_decor', terrain, 0, 0)
+    this.platforms = map.createStaticLayer('platforms', terrain, 0, 0)
     this.tilesetLayers = [this.bg, this.bgDecor, this.platforms]
     this.tilesetLayers.forEach(layer => {
       // const debugGraphics = this.add.graphics().setAlpha(0.75)
@@ -158,8 +158,8 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       x: player.playerBodyState.position.x,
       y: player.playerBodyState.position.y,
-      texture: player.characterType,
-      frame: 'idle/1',
+      texture: player.characterType, // @TODO what goes here now?
+      frame: 'idle/1', // @TODO what goes here now? see Character.ts
       characterType: player.characterType
     })
     character.body.setImmovable(!isCurrentPlayer)

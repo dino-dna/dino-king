@@ -8,4 +8,4 @@ play at [dinoking.cdaringe.com](https://dinoking.cdaringe.com)
 
 ## contributing
 
-see [contributing.md](.github/contributing.md)
+see [contributing.md](.github/contributing.md) for how to run the project and submit patches
