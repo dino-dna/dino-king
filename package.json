@@ -33,7 +33,8 @@
     "lint-staged": "^8.2.1",
     "prettier-standard": "^9.1.1",
     "standardx": "^3.0.1",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.2",
+    "yarn": "^1.22.10"
   },
   "husky": {
     "hooks": {
