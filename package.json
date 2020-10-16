@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "yarn && lerna bootstrap",
-    "format": "prettier-standard 'packages/**/src/**/*.ts' 'packages/**/src/**/*.tsx' 'packages/**/src/**/*.js'",
+    "format": "prettier --write 'packages/**/src/**/*.ts' 'packages/**/src/**/*.tsx' 'packages/**/src/**/*.js'",
     "precommit": "lint-staged",
-    "lint": "standardx '{src,test,scripts}/**/*.{ts,tsx}' --fix"
+    "lint": "prettier --check '{src,test,scripts}/**/*.{ts,tsx}'"
   },
   "lint-staged": {
     "linters": {
@@ -26,40 +26,16 @@
     }
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^1.10.2",
-    "@typescript-eslint/parser": "^1.10.2",
     "husky": "^2.4.1",
-    "lerna": "^3.15.0",
+    "lerna": "^3.22.1",
     "lint-staged": "^8.2.1",
-    "prettier-standard": "^9.1.1",
-    "standardx": "^3.0.1",
-    "typescript": "^3.5.2",
+    "prettier": "^2.1.2",
+    "typescript": "^4",
     "yarn": "^1.22.10"
   },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  },
-  "eslintConfig": {
-    "rules": {
-      "no-unused-vars": 0
-    }
-  },
-  "standardx": {
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin"
-    ],
-    "env": [
-      "browser",
-      "node"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": "off"
-    },
-    "ignore": [
-      "**/*.d.ts"
-    ]
   }
 }

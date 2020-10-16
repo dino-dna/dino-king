@@ -1,46 +1,46 @@
-import * as common from 'common'
-import { Team } from './team'
-import pino from 'pino'
+import * as common from "common";
+import { Team } from "./team";
+import pino from "pino";
 
 export type GameOptions = {
-  id: number
-  log: pino.Logger
-}
+  id: number;
+  log: pino.Logger;
+};
 
 export class Game {
-  public teamA: Team
-  public teamB: Team
-  public maxPlayersPerTeam: number
-  public id: number
-  public playerStateChangeCounter: number = 0
-  public log: pino.Logger
+  public teamA: Team;
+  public teamB: Team;
+  public maxPlayersPerTeam: number;
+  public id: number;
+  public playerStateChangeCounter: number = 0;
+  public log: pino.Logger;
 
-  constructor (opts: GameOptions) {
-    this.id = opts.id
-    this.maxPlayersPerTeam = 5
-    this.log = opts.log
+  constructor(opts: GameOptions) {
+    this.id = opts.id;
+    this.maxPlayersPerTeam = 5;
+    this.log = opts.log;
     this.teamA = new Team({
       log: opts.log,
-      color: 'blue',
+      color: "blue",
       gameId: this.id,
       maxPlayers: this.maxPlayersPerTeam,
-      players: []
-    })
+      players: [],
+    });
     this.teamB = new Team({
-      color: 'orange',
+      color: "orange",
       gameId: this.id,
       log: opts.log,
       maxPlayers: this.maxPlayersPerTeam,
-      players: []
-    })
+      players: [],
+    });
   }
 
-  get gameFull () {
-    return this.teamA.players.length + this.teamB.players.length >= this.maxPlayersPerTeam * 2
+  get gameFull() {
+    return this.teamA.players.length + this.teamB.players.length >= this.maxPlayersPerTeam * 2;
   }
 
-  getPlayerTeam (player: common.PlayerState) {
-    return player.teamId === 'blue' ? this.teamA : this.teamB
+  getPlayerTeam(player: common.PlayerState) {
+    return player.teamId === "blue" ? this.teamA : this.teamB;
   }
 
   // get playerRegistrations () {
@@ -49,37 +49,37 @@ export class Game {
   //   )
   // }
 
-  get players () {
-    return this.teamA.players.concat(this.teamB.players)
+  get players() {
+    return this.teamA.players.concat(this.teamB.players);
   }
 
-  getPlayer (uuid: number): common.PlayerState | null {
-    return this.teamA.getPlayer(uuid) || this.teamB.getPlayer(uuid)
+  getPlayer(uuid: number): common.PlayerState | null {
+    return this.teamA.getPlayer(uuid) || this.teamB.getPlayer(uuid);
   }
 
-  registerPlayer (teamColor?: common.TeamColor) {
-    let targetTeam: Team
+  registerPlayer(teamColor?: common.TeamColor) {
+    let targetTeam: Team;
     if (!teamColor) {
       // assign to team with less players
-      targetTeam = this.teamA.players.length > this.teamB.players.length ? this.teamB : this.teamA
+      targetTeam = this.teamA.players.length > this.teamB.players.length ? this.teamB : this.teamA;
     } else {
-      targetTeam = teamColor === 'blue' ? this.teamA : this.teamB
+      targetTeam = teamColor === "blue" ? this.teamA : this.teamB;
     }
-    ++this.playerStateChangeCounter
-    return targetTeam.registerPlayer()
+    ++this.playerStateChangeCounter;
+    return targetTeam.registerPlayer();
   }
 
-  removePlayer (player: common.PlayerState) {
-    ++this.playerStateChangeCounter
-    this.getPlayerTeam(player).removePlayer(player)
+  removePlayer(player: common.PlayerState) {
+    ++this.playerStateChangeCounter;
+    this.getPlayerTeam(player).removePlayer(player);
   }
 
-  setPlayerState (player: common.PlayerState, playerBodyState: common.PlayerBodyState) {
-    player.playerBodyState = playerBodyState
-    player.lastUpdateTime = Date.now()
+  setPlayerState(player: common.PlayerState, playerBodyState: common.PlayerBodyState) {
+    player.playerBodyState = playerBodyState;
+    player.lastUpdateTime = Date.now();
   }
 
-  get state (): common.CentralGameState {
+  get state(): common.CentralGameState {
     return {
       serverTime: Date.now(),
       playerStateChangeCounter: this.playerStateChangeCounter,
@@ -87,7 +87,7 @@ export class Game {
         {},
         this.teamA.playersByUuid,
         this.teamB.playersByUuid
-      ) as common.PlayerStateByUuid
-    }
+      ) as common.PlayerStateByUuid,
+    };
   }
 }

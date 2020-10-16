@@ -1,7 +1,7 @@
 class GamError extends Error {
-  static defaultMessage: string
+  static defaultMessage: string;
 }
 class TeamFullError extends GamError {}
-TeamFullError.defaultMessage = 'Team full'
+TeamFullError.defaultMessage = "Team full";
 
-export { GamError, TeamFullError }
+export { GamError, TeamFullError };

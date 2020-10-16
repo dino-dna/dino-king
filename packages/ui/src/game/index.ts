@@ -1,5 +1,5 @@
-import Phaser, { Game } from 'phaser'
-import * as gameScene from './scenes/GameScene'
+import Phaser, { Game } from "phaser";
+import * as gameScene from "./scenes/GameScene";
 
 // var walls
 // var platforms
@@ -11,28 +11,28 @@ import * as gameScene from './scenes/GameScene'
 // let queens: Array<Queen> = []
 
 export const config: Phaser.Types.Core.GameConfig = {
-  backgroundColor: '#98d687',
+  backgroundColor: "#98d687",
   input: { keyboard: true },
-  parent: 'game',
+  parent: "game",
   physics: {
-    default: 'arcade',
+    default: "arcade",
     arcade: {
       gravity: { y: 300 },
-      debug: true
-    }
+      debug: true,
+    },
   },
   scene: gameScene.GameScene,
-  title: 'Murder King',
+  title: "Murder King",
   type: Phaser.AUTO,
-  version: '1.0',
+  version: "1.0",
   width: 1280,
   height: 720,
-  zoom: 1
-}
+  zoom: 1,
+};
 
 export class MurderKing extends Game {
   // eslint-disable-next-line
-  constructor (config: Phaser.Types.Core.GameConfig) {
-    super(config)
+  constructor(config: Phaser.Types.Core.GameConfig) {
+    super(config);
   }
 }
