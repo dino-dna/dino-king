@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "husky": "^2.4.1",
-    "lerna": "^3.22.1",
+    "lerna": "^6.4.1",
     "lint-staged": "^8.2.1",
     "prettier": "^2.1.2",
     "typescript": "^4",
