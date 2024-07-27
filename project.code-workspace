@@ -15,15 +15,6 @@
 	],
 	"settings": {
 		"git.ignoreLimitWarning": true,
-		"emeraldwalk.runonsave": {
-			"autoClearConsole": true,
-			"commands": [
-				{
-					"match": "\\.[jt]sx?$",
-					"cmd": "npx prettier-standard ${file}"
-				}
-			]
-		},
 		"todo-tree.flat": false,
     "todo-tree.tags": [
       "TODO",

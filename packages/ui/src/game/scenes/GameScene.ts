@@ -11,7 +11,7 @@ import Phaser from "phaser";
 import { TINTS } from "../pallette";
 import { EventEmitter } from "events";
 import { GameMessages } from "../../interfaces";
-import { animate } from "game/character/animations";
+import { animate } from "../character/animations";
 
 export const TARGET_WIDTH = 1792;
 export const TARGET_HEIGTH = 1008;
@@ -25,10 +25,10 @@ export interface IEventLogState {
 
 export class GameScene extends Phaser.Scene {
   private characterGroup!: Phaser.GameObjects.Group;
-  private bg!: Phaser.Tilemaps.StaticTilemapLayer;
-  private bgDecor!: Phaser.Tilemaps.StaticTilemapLayer;
-  private platforms!: Phaser.Tilemaps.StaticTilemapLayer;
-  private tilesetLayers!: Phaser.Tilemaps.StaticTilemapLayer[];
+  private bg!: Phaser.Tilemaps.TilemapLayer;
+  private bgDecor!: Phaser.Tilemaps.TilemapLayer;
+  private platforms!: Phaser.Tilemaps.TilemapLayer;
+  private tilesetLayers!: Phaser.Tilemaps.TilemapLayer[];
   private eventLogState: IEventLogState;
 
   public centralState!: CentralGameState;
@@ -132,17 +132,18 @@ export class GameScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: "map" });
     this.map = map;
     const tileset = map.addTilesetImage("tileset", "tileset");
-    this.bg = map.createStaticLayer("bg", tileset, 0, 0);
-    this.bgDecor = map.createStaticLayer("bg_decor", tileset, 0, 0);
-    this.platforms = map.createStaticLayer("platforms", tileset, 0, 0);
+    if (!tileset) throw new Error("tileset not found");
+    this.bg = map.createLayer("bg", tileset, 0, 0)!;
+    this.bgDecor = map.createLayer("bg_decor", tileset, 0, 0)!;
+    this.platforms = map.createLayer("platforms", tileset, 0, 0)!;
     this.tilesetLayers = [this.bg, this.bgDecor, this.platforms];
     this.tilesetLayers.forEach((layer) => {
-      // const debugGraphics = this.add.graphics().setAlpha(0.75)
-      // layer.renderDebug(debugGraphics, {
-      //   tileColor: null, // Color of non-colliding tiles
-      //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-      // })
+      const debugGraphics = this.add.graphics().setAlpha(0.75)
+      layer.renderDebug(debugGraphics, {
+        tileColor: null, // Color of non-colliding tiles
+        collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+        faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      })
       layer.setCollisionByProperty({ collides: true });
     });
     this.cameras.main.setBackgroundColor("rgb(130, 240, 255)"); // ){ r: 120, g: 120, b: 255, a: 0.5 })
@@ -176,7 +177,7 @@ export class GameScene extends Phaser.Scene {
       this.physics.add.collider(
         character,
         this.characterGroup,
-        this.onPlayersCollide.bind(this),
+        this.onPlayersCollide,
       );
       this.currentPlayer = character;
       this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05);
@@ -234,17 +235,24 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  onPlayersCollide(
-    player1Object: Phaser.GameObjects.GameObject,
-    player2Object: Phaser.GameObjects.GameObject,
-  ) {
+  onPlayersCollide: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (
+    player1Object,
+    player2Object,
+  ) => {
+    if (!('body' in player1Object && 'body' in player2Object)) {
+      return
+    }
     const player1Body = player1Object.body as Phaser.Physics.Arcade.Body;
     const player2Body = player2Object.body as Phaser.Physics.Arcade.Body;
+
     let player1Id, player2Id;
     for (const [id, character] of this.charactersByUuid.entries()) {
       if (character === player1Object) player1Id = id;
       else if (character === player2Object) player2Id = id;
       if (player1Id && player2Id) break;
+    }
+    if (!player1Id || !player2Id) {
+      return
     }
     const player1State = this.centralState.playerStateByUuid[player1Id];
     const player2State = this.centralState.playerStateByUuid[player2Id];
@@ -263,10 +271,10 @@ export class GameScene extends Phaser.Scene {
       const currentCharacters = Array.from(this.charactersByUuid.entries());
       const [topId, _] = currentCharacters.find(
         ([_, character]) => character.body === topPlayerBody,
-      ); // eslint-disable-line
+      ) ?? []; // eslint-disable-line
       const [bottomId, __] = currentCharacters.find(
         ([_, character]) => character.body === bottomPlayerBody,
-      ); // eslint-disable-line
+      )?? []; // eslint-disable-line
       this.ws.send(
         JSON.stringify({
           type: KingClientMessage.KILL_PLAYER,
@@ -311,7 +319,7 @@ export class GameScene extends Phaser.Scene {
       (this as any)._debug_widget = gameStateWidget;
     }
     gameStateWidget.style.display = "block";
-    const debugState = {};
+    const debugState: any = {};
     for (let playerUuid in payload.playerStateByUuid) {
       let body = payload.playerStateByUuid[playerUuid].playerBodyState;
       let localCharacter = this.charactersByUuid.get(parseInt(playerUuid));
@@ -386,7 +394,7 @@ export class GameScene extends Phaser.Scene {
         } else {
           // otherwise, tween 'em over
           character.tween &&
-            character.tween.isPlaying &&
+            character.tween.isPlaying() &&
             character.tween.stop();
           character.tween = this.add.tween({
             targets: character,

@@ -3,12 +3,8 @@ import * as React from "react";
 import { MurderKing, config as gameConfig } from "./game/index";
 import { GameMessages, GameState } from "./interfaces";
 import cx from "classnames";
-import { Banner } from "Banner";
-
-type Nanobus = <Msg>() => {
-  on: (msg: Msg, cb: () => void) => void;
-};
-const nanobus: Nanobus = require("nanobus");
+import { Banner } from "./Banner";
+import Nanobus from "nanobus";
 
 export interface IAppState {
   gameState: GameState;
@@ -18,8 +14,9 @@ function assertNever(x: never): never {
   throw new Error("Unexpected object: " + x);
 }
 
-export const App: React.FC<IAppState> = (props) => {
-  const [bus] = React.useState(nanobus());
+export const App: React.FC<{}> = (props) => {
+  const [bus] = React.useState(new Nanobus());
+  (window as any).bus =bus
   const [gameContainer, setGameContainer] =
     React.useState<HTMLDivElement | null>(null);
   const [state, setState] = React.useState<GameState>({
@@ -46,6 +43,7 @@ export const App: React.FC<IAppState> = (props) => {
   let banner;
   let gameNode;
   let greatSuff;
+
   switch (type) {
     case "Running":
     case "Starting":

@@ -1,37 +1,34 @@
 {
   "name": "dino-king-server",
   "version": "0.0.1",
-  "main": "src/bin.js",
+  "main": "./src/bin.js",
   "license": "MIT",
   "scripts": {
     "build:map": "ts-node scripts/map.ts",
     "clean": "del '{src,scripts}/**/*.{map,js}'",
     "prestart": "run-p clean build:map",
-    "start:compiler": "tsc -w --preserveWatchOutput",
-    "start:server": "nodemon src/bin.js",
-    "start": "run-p start:*"
+    "start": "nodemon --exec ts-node ./src/bin.ts"
   },
   "dependencies": {
-    "perish": "^1.0.2",
-    "common": "workspace:*",
     "bluebird": "^3.5.5",
+    "common": "workspace:*",
     "lodash": "^4.17.11",
     "pino": "^5.12.6",
     "pino-pretty": "^3.1.0",
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "del-cli": "^2.0.0",
     "@types/bluebird": "^3.5.27",
     "@types/fs-extra": "^7.0.0",
     "@types/lodash": "^4.14.134",
+    "@types/node": "20.14.12",
     "@types/pino": "^5.8.8",
     "@types/ws": "^6.0.1",
+    "del-cli": "~2.0.0",
     "fs-extra": "^8.0.1",
     "nodemon": "^1.19.1",
     "npm-run-all2": "^5.0.0",
-    "typescript": "^3.5.2",
-    "ts-node": "^8.3.0",
-    "del-cli": "~2.0.0"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.5.2"
   }
 }

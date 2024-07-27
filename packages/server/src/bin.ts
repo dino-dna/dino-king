@@ -118,8 +118,8 @@ export const broadcastDebounced = debounce(broadcast, 50, {
   // leading: true,
   maxWait: 50,
 });
-["SIGINT", "SIGHUP"].forEach((signal) => {
-  process.on(signal as any, async () => {
+["SIGINT" as const, "SIGHUP" as const].forEach((signal) => {
+  process.on(signal, async () => {
     for (let game of Object.values(gamesById)) {
       log.info(`shutting down. broadcasting KingServerMessage.TEARDOWN`);
       try {

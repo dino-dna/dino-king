@@ -1,40 +1,11 @@
 {
-  "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "build/dist",
-    "module": "esnext",
-    "target": "ESNext",
-    "lib": ["es6", "dom", "scripthost"],
-    "sourceMap": true,
-    "allowJs": true,
-    "jsx": "preserve",
-    "moduleResolution": "node",
-    "downlevelIteration": true,
-    "rootDir": "src",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitAny": false,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": false,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true
-  },
-  "exclude": [
-    "public",
-    "node_modules",
-    "build",
-    "scripts",
-    "acceptance-tests",
-    "webpack",
-    "jest",
-    "src/setupTests.ts"
-  ],
-  "include": ["src"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

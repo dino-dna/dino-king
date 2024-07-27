@@ -1,27 +1,19 @@
-import {
-  KING as KING_FRAME_META,
-  KNIGHT as KNIGHT_FRAME_META,
-  PEON as PEON_FRAME_META,
-} from "./frames";
+import { assets } from '../../assets';
 
 export const animate = (scene: Phaser.Scene) => {
-  [
-    { name: "king", meta: KING_FRAME_META },
-    { name: "knight", meta: KNIGHT_FRAME_META },
-    { name: "peon", meta: PEON_FRAME_META },
-  ].forEach(({ name, meta }) => {
-    for (var type in meta as any) {
+  Object.entries(assets.textureFrameIndicies).map(([name, states]) => {
+    Object.entries(states).map(([state /* e.g. idle, running */, {min, max}]) => {
       var frames = scene.anims.generateFrameNames(name, {
-        start: 1,
-        end: meta[type].frames,
-        prefix: `${type}/`,
+        start: min,
+        end: max,
+        prefix: `${state}/`,
       });
       scene.anims.create({
-        key: `${name}_${type}`,
+        key: `${name}_${state}`,
         frames,
         frameRate: 10,
         repeat: -1,
       });
-    }
+    });
   });
 };
