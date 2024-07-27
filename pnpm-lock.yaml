@@ -94,8 +94,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       http-proxy-middleware:
-        specifier: ^0.19.1
-        version: 0.19.2
+        specifier: ^0.21.0
+        version: 0.21.0
       lodash:
         specifier: ^4.17.11
         version: 4.17.21
@@ -1149,6 +1149,9 @@ packages:
 
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
+
+  '@types/http-proxy@1.17.14':
+    resolution: {integrity: sha512-SSrD0c1OQzlFX7pGu1eXxSEjemej64aaNPRhhVYUGqXh0BtldAAx37MG8btcumvpgKyZp1F5Gn3JkktdxiFv6w==}
 
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
@@ -3376,9 +3379,9 @@ packages:
     resolution: {integrity: sha512-yHYTgWMQO8VvwNS22eLLloAkvungsKdKTLO8AJlftYIKNfJr3GK3zK0ZCfzDDGUBttdGc8xFy1mCitvNKQtC3Q==}
     engines: {node: '>=4.0.0'}
 
-  http-proxy-middleware@0.19.2:
-    resolution: {integrity: sha512-aYk1rTKqLTus23X3L96LGNCGNgWpG4cG0XoZIT1GUPhhulEHX/QalnO6Vbo+WmKWi4AL2IidjuC0wZtbpg0yhQ==}
-    engines: {node: '>=4.0.0'}
+  http-proxy-middleware@0.21.0:
+    resolution: {integrity: sha512-4Arcl5QQ6pRMRJmtM1WVHKHkFAQn5uvw83XuNeqnMTOikDiCoTxv5/vdudhKQsF+1mtaAawrK2SEB1v2tYecdQ==}
+    engines: {node: '>=8.0.0'}
 
   http-proxy@1.18.1:
     resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
@@ -7997,7 +8000,9 @@ snapshots:
       jest-runner: 24.9.0
       jest-runtime: 24.9.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/transform@24.9.0':
     dependencies:
@@ -8155,6 +8160,10 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
+      '@types/node': 10.17.60
+
+  '@types/http-proxy@1.17.14':
+    dependencies:
       '@types/node': 10.17.60
 
   '@types/istanbul-lib-coverage@2.0.6': {}
@@ -11062,15 +11071,15 @@ snapshots:
       - debug
       - supports-color
 
-  http-proxy-middleware@0.19.2:
+  http-proxy-middleware@0.21.0:
     dependencies:
+      '@types/http-proxy': 1.17.14
       http-proxy: 1.18.1(debug@4.3.5(supports-color@6.1.0))
       is-glob: 4.0.3
       lodash: 4.17.21
-      micromatch: 3.1.10
+      micromatch: 4.0.7
     transitivePeerDependencies:
       - debug
-      - supports-color
 
   http-proxy@1.18.1(debug@4.3.5(supports-color@6.1.0)):
     dependencies:
