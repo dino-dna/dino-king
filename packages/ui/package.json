@@ -35,11 +35,11 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "common": "^0.0.1",
+    "common": "workspace:*",
     "classnames": "^2.2.6",
     "lodash": "^4.17.11",
     "nanobus": "^4.4.0",
-    "http-proxy-middleware":"^0.19.1"
+    "http-proxy-middleware": "^0.19.1"
   },
   "browserslist": {
     "production": [
