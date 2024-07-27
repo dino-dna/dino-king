@@ -76,7 +76,7 @@ export class GameScene extends Phaser.Scene {
               uid,
             },
           },
-        })
+        }),
       );
     });
     ws.addEventListener("error", (evt: Event) => {
@@ -110,7 +110,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   configurePlayers(playersByUuid: PlayerStateByUuid) {
-    const remoteIds: Set<number> = new Set(Object.keys(playersByUuid).map((i) => parseInt(i)));
+    const remoteIds: Set<number> = new Set(
+      Object.keys(playersByUuid).map((i) => parseInt(i)),
+    );
     const localIds: Set<number> = new Set(this.charactersByUuid.keys());
     const toAdd = new Set([...remoteIds].filter((x) => !localIds.has(x)));
     const toRemove = new Set([...localIds].filter((x) => !remoteIds.has(x)));
@@ -167,14 +169,22 @@ export class GameScene extends Phaser.Scene {
     const characterTints = player.teamId === "blue" ? TINTS.BLUE : TINTS.ORANGE;
     character.setTint(...characterTints);
     this.characterGroup.add(character);
-    this.tilesetLayers.forEach((layer) => this.physics.add.collider(character, layer));
+    this.tilesetLayers.forEach((layer) =>
+      this.physics.add.collider(character, layer),
+    );
     if (isCurrentPlayer) {
-      this.physics.add.collider(character, this.characterGroup, this.onPlayersCollide.bind(this));
+      this.physics.add.collider(
+        character,
+        this.characterGroup,
+        this.onPlayersCollide.bind(this),
+      );
       this.currentPlayer = character;
       this.cameras.main.startFollow(this.currentPlayer, true, 0.05, 0.05);
     }
     this.charactersByUuid.set(player.uuid, character);
-    console.log(`created player [current player: ${isCurrentPlayer}]: ${player.uuid}`);
+    console.log(
+      `created player [current player: ${isCurrentPlayer}]: ${player.uuid}`,
+    );
   }
 
   killPlayer(uuid: number) {
@@ -218,11 +228,16 @@ export class GameScene extends Phaser.Scene {
         this.bus.emit(GameMessages.GameShutdown);
         break;
       default:
-        throw new Error(`unsupported message type: ${type || "MESSAGE_TYPE_MISSING"}`);
+        throw new Error(
+          `unsupported message type: ${type || "MESSAGE_TYPE_MISSING"}`,
+        );
     }
   }
 
-  onPlayersCollide(player1Object: Phaser.GameObjects.GameObject, player2Object: Phaser.GameObjects.GameObject) {
+  onPlayersCollide(
+    player1Object: Phaser.GameObjects.GameObject,
+    player2Object: Phaser.GameObjects.GameObject,
+  ) {
     const player1Body = player1Object.body as Phaser.Physics.Arcade.Body;
     const player2Body = player2Object.body as Phaser.Physics.Arcade.Body;
     let player1Id, player2Id;
@@ -237,15 +252,21 @@ export class GameScene extends Phaser.Scene {
       return console.error("unknown players collided wtf");
     }
     if (player1State.teamId === player2State.teamId) return;
-    const topPlayerBody = player1Body.y < player2Body.y ? player1Body : player2Body;
-    const bottomPlayerBody = topPlayerBody === player1Body ? player2Body : player1Body;
+    const topPlayerBody =
+      player1Body.y < player2Body.y ? player1Body : player2Body;
+    const bottomPlayerBody =
+      topPlayerBody === player1Body ? player2Body : player1Body;
     const topPlayerBottomY = topPlayerBody.y + topPlayerBody.halfHeight;
     const bottomPlayerTopY = bottomPlayerBody.y - bottomPlayerBody.halfHeight;
     // @TODO improve kill conditions!
     if (topPlayerBottomY <= bottomPlayerTopY) {
       const currentCharacters = Array.from(this.charactersByUuid.entries());
-      const [topId, _] = currentCharacters.find(([_, character]) => character.body === topPlayerBody); // eslint-disable-line
-      const [bottomId, __] = currentCharacters.find(([_, character]) => character.body === bottomPlayerBody); // eslint-disable-line
+      const [topId, _] = currentCharacters.find(
+        ([_, character]) => character.body === topPlayerBody,
+      ); // eslint-disable-line
+      const [bottomId, __] = currentCharacters.find(
+        ([_, character]) => character.body === bottomPlayerBody,
+      ); // eslint-disable-line
       this.ws.send(
         JSON.stringify({
           type: KingClientMessage.KILL_PLAYER,
@@ -253,7 +274,7 @@ export class GameScene extends Phaser.Scene {
             killed: bottomId,
             killedBy: topId,
           },
-        })
+        }),
       );
     }
   }
@@ -272,7 +293,9 @@ export class GameScene extends Phaser.Scene {
         this.currentPlayer.body.acceleration.x,
         this.currentPlayer.body.acceleration.y,
       ];
-      const isStateMatching = currentUserBodyState.every((v, i) => v === this.lastUpdatePlayerBodyState[i]);
+      const isStateMatching = currentUserBodyState.every(
+        (v, i) => v === this.lastUpdatePlayerBodyState[i],
+      );
       if (!isStateMatching) {
         this.lastUpdatePlayerBodyState = currentUserBodyState;
         this.sendPlayerState();
@@ -281,7 +304,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   updateDebugWidget(payload: CentralGameState) {
-    const gameStateWidget = (this as any)._debug_widget || window.document.getElementById("game_state")!;
+    const gameStateWidget =
+      (this as any)._debug_widget ||
+      window.document.getElementById("game_state")!;
     if (!(this as any)._debug_widget) {
       (this as any)._debug_widget = gameStateWidget;
     }
@@ -347,14 +372,22 @@ export class GameScene extends Phaser.Scene {
       } else if (playerState.playerBodyState) {
         let vx = playerState.playerBodyState.velocity.x;
         // if things are running fast, just move the character
-        if (character.body.position.x === targetX && character.body.position.y === targetY) {
+        if (
+          character.body.position.x === targetX &&
+          character.body.position.y === targetY
+        ) {
           // no op
           console.log("player didnt move");
         } else if (this.msBetweenMessages < 25) {
-          character.setPosition(targetX + character.body.width, targetY + character.body.halfHeight);
+          character.setPosition(
+            targetX + character.body.width,
+            targetY + character.body.halfHeight,
+          );
         } else {
           // otherwise, tween 'em over
-          character.tween && character.tween.isPlaying && character.tween.stop();
+          character.tween &&
+            character.tween.isPlaying &&
+            character.tween.stop();
           character.tween = this.add.tween({
             targets: character,
             x: targetX + character.body.width,
@@ -364,13 +397,17 @@ export class GameScene extends Phaser.Scene {
         }
         character.body.setAcceleration(
           playerState.playerBodyState.acceleration.x,
-          playerState.playerBodyState.acceleration.y
+          playerState.playerBodyState.acceleration.y,
         );
-        character.body.setVelocity(playerState.playerBodyState.velocity.x, playerState.playerBodyState.velocity.y);
+        character.body.setVelocity(
+          playerState.playerBodyState.velocity.x,
+          playerState.playerBodyState.velocity.y,
+        );
         if (
           character.anims.currentAnim &&
           playerState.playerBodyState.currentAnimationName &&
-          playerState.playerBodyState.currentAnimationName !== character.anims.currentAnim.key
+          playerState.playerBodyState.currentAnimationName !==
+            character.anims.currentAnim.key
         ) {
           character.animate(playerState.playerBodyState.currentAnimationName);
         }
@@ -399,7 +436,7 @@ export class GameScene extends Phaser.Scene {
           acceleration: this.currentPlayer.body.acceleration,
           currentAnimationName: this.currentPlayer.currentAnimationName,
         },
-      })
+      }),
     );
   }
 }

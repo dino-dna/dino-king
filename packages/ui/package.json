@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A multiplayer jousting game",
   "scripts": {
-    "prestart": "node scripts/build-asset-pack",
+    "prestart": "node ./scripts/build-asset-pack.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
@@ -21,32 +21,27 @@
   },
   "homepage": "https://github.com/cdaringe/dino-king#readme",
   "devDependencies": {
-    "@types/classnames": "^2.2.6",
-    "@types/node": "^10.9.1",
-    "@types/react": "^16.8.18",
-    "@types/react-dom": "^16.8.4",
-    "npm-run-all2": "^5.0.0",
-    "phaser": "^3.17.0",
+    "@types/classnames": "^2.3.1",
+    "@types/node": "^20.14.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "fs-extra": "^8.0.1",
+    "npm-run-all2": "^6.2.2",
+    "phaser": "^3.80.1",
     "phaser-webpack-loader": "^2.0.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "^3.0.1",
-    "standard": "^12.0.1",
-    "typescript": "^3.5.2"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1"
   },
   "dependencies": {
+    "classnames": "^2.5.1",
     "common": "workspace:*",
-    "classnames": "^2.2.6",
-    "lodash": "^4.17.11",
-    "nanobus": "^4.4.0",
-    "http-proxy-middleware": "^0.21.0"
+    "http-proxy-middleware": "^0.21.0",
+    "lodash": "^4.17.21",
+    "nanobus": "^4.5.0"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
+    "production": [">0.2%", "not dead", "not op_mini all"],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",

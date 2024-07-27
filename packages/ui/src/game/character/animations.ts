@@ -1,4 +1,8 @@
-import { KING as KING_FRAME_META, KNIGHT as KNIGHT_FRAME_META, PEON as PEON_FRAME_META } from "./frames";
+import {
+  KING as KING_FRAME_META,
+  KNIGHT as KNIGHT_FRAME_META,
+  PEON as PEON_FRAME_META,
+} from "./frames";
 
 export const animate = (scene: Phaser.Scene) => {
   [

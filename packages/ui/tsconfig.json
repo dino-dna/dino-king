@@ -4,11 +4,7 @@
     "outDir": "build/dist",
     "module": "esnext",
     "target": "ESNext",
-    "lib": [
-      "es6",
-      "dom",
-      "scripthost"
-    ],
+    "lib": ["es6", "dom", "scripthost"],
     "sourceMap": true,
     "allowJs": true,
     "jsx": "preserve",
@@ -40,7 +36,5 @@
     "jest",
     "src/setupTests.ts"
   ],
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

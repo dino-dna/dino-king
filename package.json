@@ -6,7 +6,7 @@
   "author": "cdaringe <christopher.dieringer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "format": "prettier --write 'packages/**/src/**/*.ts' 'packages/**/src/**/*.tsx' 'packages/**/src/**/*.js'",
+    "format": "biome format --write",
     "precommit": "lint-staged"
   },
   "devDependencies": {

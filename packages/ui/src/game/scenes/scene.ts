@@ -16,7 +16,7 @@ export function update(scene: GameScene) {
       currentPlayer.body.acceleration.y,
     ];
     const isCurrentPlayerBodyStateChanged = currentPlayerBodyState.every(
-      (v, i) => v === scene.lastUpdatePlayerBodyState[i]
+      (v, i) => v === scene.lastUpdatePlayerBodyState[i],
     );
     if (!isCurrentPlayerBodyStateChanged) {
       scene.lastUpdatePlayerBodyState = currentPlayerBodyState;

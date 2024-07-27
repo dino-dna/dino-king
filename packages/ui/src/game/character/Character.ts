@@ -29,7 +29,9 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.body.setBounce(0, 0);
 
     // input
-    this.jumpKey = params.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.jumpKey = params.scene.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+    );
     params.scene.add.existing(this);
 
     this.onCharacterChange();
@@ -99,7 +101,8 @@ export class Character extends Phaser.GameObjects.Sprite {
       this.body.setDragX(200);
     }
     if (this.jumpKey.isUp) this.canFlap = true;
-    const isFlapping = this.canFlap && this.jumpKey.isDown && this.body.velocity.y >= -200;
+    const isFlapping =
+      this.canFlap && this.jumpKey.isDown && this.body.velocity.y >= -200;
 
     if (isFlapping) {
       this.canFlap = false;

@@ -20,8 +20,12 @@ function assertNever(x: never): never {
 
 export const App: React.FC<IAppState> = (props) => {
   const [bus] = React.useState(nanobus());
-  const [gameContainer, setGameContainer] = React.useState<HTMLDivElement | null>(null);
-  const [state, setState] = React.useState<GameState>({ error: false, type: "Starting" });
+  const [gameContainer, setGameContainer] =
+    React.useState<HTMLDivElement | null>(null);
+  const [state, setState] = React.useState<GameState>({
+    error: false,
+    type: "Starting",
+  });
   const [game, setGame] = React.useState<MurderKing | null>(null);
   React.useEffect(() => {
     bus.on(GameMessages.SocketError, () => {

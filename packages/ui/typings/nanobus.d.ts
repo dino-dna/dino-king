@@ -1,1 +1,1 @@
-declare module 'nanobus'
+declare module "nanobus";

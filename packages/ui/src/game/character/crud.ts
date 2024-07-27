@@ -33,5 +33,7 @@ export interface GetSpawnPointConfig {
 const getSpawnPoint = ({ map, player }: GetSpawnPointConfig) =>
   map.findObject(
     "spawns",
-    (obj) => obj.name === `${player.teamId === "blue" ? player.teamPlayerId : player.teamPlayerId + 5}`
+    (obj) =>
+      obj.name ===
+      `${player.teamId === "blue" ? player.teamPlayerId : player.teamPlayerId + 5}`,
   );

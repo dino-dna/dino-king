@@ -26,7 +26,10 @@ export interface SocketErrorState {
 }
 
 export type ErrorGameState = SocketErrorState;
-export type OkGameState = RunningGameState | StartedGameState | StoppedGameState;
+export type OkGameState =
+  | RunningGameState
+  | StartedGameState
+  | StoppedGameState;
 export type GameState = ErrorGameState | OkGameState;
 
 export type CharacterInitOptions = {
