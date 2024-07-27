@@ -3,5 +3,19 @@
   "automerge": true,
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "groupName": "minor-updates",
+      "matchUpdateTypes": [
+        "minor"
+      ]
+    },
+    {
+      "groupName": "major-updates",
+      "matchUpdateTypes": [
+        "major"
+      ]
+    }
   ]
 }
