@@ -8,16 +8,47 @@ const DEFAULT_MAX_VELOCITY_X = 250;
 
 export class Character extends Phaser.GameObjects.Sprite {
   private jumpKey: Phaser.Input.Keyboard.Key;
-  public body!: Phaser.Physics.Arcade.Body;
+  public body: Phaser.Physics.Arcade.Body;
   public characterType: CharacterType;
   public currentAnimationName!: string;
   public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   public tween!: Phaser.Tweens.Tween;
   public canFlap: boolean;
 
+  /**
+   * @warn So this is a bit of a nightmare. Here's the scoop.
+   * A Sprite can be flipped. However, flipping a sprite always flips the tile's
+   * image about it's true x center, _not_ the set x origin. That means that the the body
+   * get's flipped nicely about it's x origin, but the image is flipped about
+   * it's literal center. Thus, we need to adjust the body's position when we flip
+   * the image so that the body is still in the right place relative to the image.
+   * The values below are unscaled values.
+   */
+  private handledXFlip: boolean = false;
+  private collisionBoxWidth: number = 80;
+  private collisionBoxHeight: number = 100;
+  private collisionBoxXOffset: number = 30;
+  private collisionBoxYOffset = 30;
+  // @warn this value must correlate strictly to the image, not where you want the bounding box.
+  private kingXCenterOffsetPercentFromLeft: number = 0.35;
+  private kingXCenterOffsetPxFromFromLeft: number =
+    this.width * this.kingXCenterOffsetPercentFromLeft;
+  private kingXCenterOffsetPxFromRight: number = this.width - this.kingXCenterOffsetPxFromFromLeft;
+
+  /**
+   * flipX true center px  - flipX false center px
+   */
+  private spriteFlippedXCenterDeltaPx = this.kingXCenterOffsetPxFromRight -
+    this.kingXCenterOffsetPxFromFromLeft;
+
   constructor(params: CharacterInitOptions) {
     super(params.scene, params.x, params.y, params.texture, params.frame);
-    this.cursors = this.scene.input.keyboard.createCursorKeys();
+    const scale = params.characterType === "king" ? 0.5 : 0.6;
+    this.scale = scale;
+
+    // ssshhhhhhh typescript shhhh
+    this.body = (this as any).body as Phaser.Physics.Arcade.Body;
+    this.cursors = this.scene.input.keyboard!.createCursorKeys();
     params.scene.physics.world.enable(this);
     this.body.gravity.y = DEFAULT_ACCEL_Y;
     this.body.setAllowDrag(true);
@@ -25,11 +56,13 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.body.setFriction(0.7, 0);
     this.characterType = params.characterType;
     this.canFlap = true;
-
     this.body.setBounce(0, 0);
 
+
+    this.spriteFlippedXCenterDeltaPx
+
     // input
-    this.jumpKey = params.scene.input.keyboard.addKey(
+    this.jumpKey = params.scene.input.keyboard!.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE,
     );
     params.scene.add.existing(this);
@@ -37,15 +70,34 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.onCharacterChange();
   }
 
+  onCharacterDirChange() {
+    if (this.characterType !== "king") return;
+    if (this.flipX) {
+      if (this.handledXFlip) return;
+      this.handledXFlip = true;
+      this.body.position.x -= this.spriteFlippedXCenterDeltaPx *this.scale;
+      this.body.setOffset(
+        (this.width - this.collisionBoxWidth - this.collisionBoxXOffset),
+        (this.collisionBoxYOffset),
+      );
+    } else {
+      this.handledXFlip = false;
+      if (this.body.offset.x === this.collisionBoxXOffset) return;
+      this.body.setOffset(
+        this.collisionBoxXOffset,
+        this.collisionBoxYOffset
+      );
+      this.body.position.x += this.spriteFlippedXCenterDeltaPx * this.scale;
+    }
+  }
+
   onCharacterChange() {
     if (this.characterType === "king") {
-      this.body.setSize(80, 110);
-      this.body.setOffset(25, 15);
-      this.setScale(0.5, 0.5);
+      this.body.setSize(this.collisionBoxWidth, this.collisionBoxHeight, false);
+      this.body.setOffset(this.collisionBoxXOffset, this.collisionBoxYOffset);
     } else if (this.characterType === "peon") {
       this.body.setSize(50, 90);
       this.body.setOffset(16, 20);
-      this.setScale(0.6, 0.6);
     }
   }
 
@@ -60,6 +112,15 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.anims.play(`${this.characterType}_${key}`, true);
   }
 
+  private maybeRunAnimate() {
+    if (this.currentAnimationName === "jump") {
+      return this.body.velocity.y != 0 ? null : this.animate("run");
+    }
+    if (this.currentAnimationName !== "run") {
+      this.animate("run");
+    }
+  }
+
   private handleInput(): void {
     if (this.body.immovable) {
       return;
@@ -69,14 +130,15 @@ export class Character extends Phaser.GameObjects.Sprite {
       return;
     }
     const { cursors } = this;
+
     if (cursors.left!.isDown) {
       this.body.setAccelerationX(-DEFAULT_ACCEL_X);
       this.setFlipX(true);
-      this.animate("run");
+      this.maybeRunAnimate();
     } else if (cursors.right!.isDown) {
       this.setFlipX(false);
       this.body.setAccelerationX(DEFAULT_ACCEL_X);
-      this.animate("run");
+      this.maybeRunAnimate();
     }
     if (this.body.velocity.x > DEFAULT_MAX_VELOCITY_X) {
       this.body.velocity.x = DEFAULT_MAX_VELOCITY_X;
@@ -93,9 +155,9 @@ export class Character extends Phaser.GameObjects.Sprite {
     if (this.body.onFloor()) {
       if (!isAccelleratingX) {
         this.body.setAccelerationX(0);
+        if (this.currentAnimationName !== "idle") this.animate("idle");
       }
       this.body.setDragX(600);
-      if (!this.body.velocity.x) this.animate("idle");
     } else {
       if (!isAccelleratingX) this.body.setAccelerationX(0);
       this.body.setDragX(200);
@@ -108,9 +170,12 @@ export class Character extends Phaser.GameObjects.Sprite {
       this.canFlap = false;
       this.flap();
     }
+
+    this.onCharacterDirChange();
   }
 
   public flap(): void {
+    if (this.currentAnimationName !== "jump") this.animate("jump");
     this.body.setVelocityY(-300);
   }
 }

@@ -44,7 +44,6 @@ const characterDatas = characterKeys.map((characterName) => {
   );
   fs.copyFileSync(characterSpriteJson, characterSpriteJsonTargetFilename);
 
-
   console.log(`reformatting ${characterName} animation titles`);
   const characterSpriteJsonParsed = require(characterSpriteJsonTargetFilename);
   const filenamesByTextureName = new Map();
@@ -54,7 +53,7 @@ const characterDatas = characterKeys.map((characterName) => {
       frame.filename = frame.filename.replace(".png", "");
 
       const filenames = filenamesByTextureName.get(textureName) || [];
-      filenames.push(frame.filename)
+      filenames.push(frame.filename);
       filenamesByTextureName.set(textureName, filenames);
     });
     texture.frames.sort((a, b) => {
@@ -66,25 +65,26 @@ const characterDatas = characterKeys.map((characterName) => {
     JSON.stringify(characterSpriteJsonParsed, null, 2),
   );
 
-
-  const textureFrameIndicies = [...filenamesByTextureName.entries()].map(([textureName, filenames]) => {
-    const frameStates = filenames.map(filename => {
-      const [state, frameNumStr] = filename.split('/')
-      const frameNum = Number(frameNumStr)
-      return [state, frameNum]
-    });
-    const framesByState = frameStates.reduce((acc, [stateName, frameNum]) => {
-      const state = acc[stateName] || { min: Infinity, max: -Infinity}
-      state.min = Math.min(state.min, frameNum)
-      state.max = Math.max(state.max, frameNum)
-      acc[stateName] = state
-      return acc
-    }, {});;
-    return { textureName, framesByState }
-  }).reduce((acc, { textureName, framesByState }) => {
-    acc[textureName.replace(/\..+/, '')] = framesByState
-    return acc
-  }, {});
+  const textureFrameIndicies = [...filenamesByTextureName.entries()]
+    .map(([textureName, filenames]) => {
+      const frameStates = filenames.map((filename) => {
+        const [state, frameNumStr] = filename.split("/");
+        const frameNum = Number(frameNumStr);
+        return [state, frameNum];
+      });
+      const framesByState = frameStates.reduce((acc, [stateName, frameNum]) => {
+        const state = acc[stateName] || { min: Infinity, max: -Infinity };
+        state.min = Math.min(state.min, frameNum);
+        state.max = Math.max(state.max, frameNum);
+        acc[stateName] = state;
+        return acc;
+      }, {});
+      return { textureName, framesByState };
+    })
+    .reduce((acc, { textureName, framesByState }) => {
+      acc[textureName.replace(/\..+/, "")] = framesByState;
+      return acc;
+    }, {});
 
   return { textureFrameIndicies };
 });
@@ -92,8 +92,8 @@ const characterDatas = characterKeys.map((characterName) => {
 fs.writeFileSync(
   constants.ASSEST_TS_METADATA_FILENAME,
   `export const assets = ${JSON.stringify(merge({}, ...characterDatas), null, 2)} as const`,
-  'utf-8'
-)
+  "utf-8",
+);
 // const readPack = () =>
 //   JSON.parse(fs.readFileSync(constants.ASSET_PACK_FILENAME))
 // const writePack = pack =>

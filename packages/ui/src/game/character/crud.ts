@@ -3,6 +3,7 @@ import { PlayerState } from "common";
 import { Character } from "./Character";
 import { TINTS } from "../pallette";
 import { GameScene } from "../scenes/GameScene";
+import { assets } from "../../assets";
 
 export interface CreatePlayerOpts {
   player: PlayerState;
@@ -17,7 +18,7 @@ export function create(opts: CreatePlayerOpts) {
     x: (spawnPoint as any).x,
     y: (spawnPoint as any).y,
     texture: player.characterType,
-    frame: "idle/1",
+    frame: `idle/${assets.textureFrameIndicies[player.characterType].idle.min}`,
     characterType: player.characterType,
   });
   character.animate("idle");

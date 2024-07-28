@@ -1,27 +1,23 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "packages/server"
-		},
-		{
-			"path": "packages/ui"
+  "folders": [
+    {
+      "path": "."
     },
     {
-			"path": "packages/common"
+      "path": "packages/server"
+    },
+    {
+      "path": "packages/ui"
+    },
+    {
+      "path": "packages/common"
     }
-	],
-	"settings": {
-		"git.ignoreLimitWarning": true,
-		"todo-tree.flat": false,
-    "todo-tree.tags": [
-      "TODO",
-      "FIXME",
-      "@TODO"
-		],
-		"typescript.tsdk": "ui/node_modules/typescript/lib",
-		"todo-tree.expanded": true
-	}
+  ],
+  "settings": {
+    "git.ignoreLimitWarning": true,
+    "todo-tree.flat": false,
+    "todo-tree.tags": ["TODO", "FIXME", "@TODO"],
+    "typescript.tsdk": "ui/node_modules/typescript/lib",
+    "todo-tree.expanded": true
+  }
 }

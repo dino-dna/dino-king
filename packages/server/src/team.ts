@@ -6,7 +6,9 @@ import bluebird from "bluebird";
 const mapJson = require("./resources/map.json");
 const mapSpawnPoints: { x: number; y: number }[] = mapJson.layers
   .find((layer: any) => layer.name === "spawns")
-  .objects.sort((a: any, b: any) => (parseInt(a.name) < parseInt(b.name) ? -1 : 1))
+  .objects.sort((a: any, b: any) =>
+    parseInt(a.name) < parseInt(b.name) ? -1 : 1,
+  )
   .map((layer: any) => ({ x: layer.x, y: layer.y }));
 if (!mapSpawnPoints || !mapSpawnPoints.length) {
   throw new Error("failed to find spawn points for characters in map");
@@ -43,8 +45,12 @@ export class Team {
     this.log = opts.log;
   }
 
-  public static getSpawnPoint({ color, teamPlayerId }: GetSpawnPointOptions): { x: number; y: number } {
-    const point = mapSpawnPoints[color === "blue" ? teamPlayerId : teamPlayerId + 5];
+  public static getSpawnPoint({ color, teamPlayerId }: GetSpawnPointOptions): {
+    x: number;
+    y: number;
+  } {
+    const point =
+      mapSpawnPoints[color === "blue" ? teamPlayerId : teamPlayerId + 5];
     if (!point) throw new Error("unable to find spawn point");
     return point;
   }
@@ -53,7 +59,10 @@ export class Team {
     return this.players.find((reg) => reg.uuid === uuid) || null;
   }
 
-  public static getInitialPlayerBodyState({ color, teamPlayerId }: GetSpawnPointOptions): common.PlayerBodyState {
+  public static getInitialPlayerBodyState({
+    color,
+    teamPlayerId,
+  }: GetSpawnPointOptions): common.PlayerBodyState {
     const { x, y } = Team.getSpawnPoint({ color, teamPlayerId });
     return {
       currentAnimationName: "__init__",
@@ -82,7 +91,9 @@ export class Team {
   }
 
   registerPlayer() {
-    if (this.isFull) throw new TeamFullError();
+    if (this.isFull) {
+      throw new TeamFullError();
+    }
     ++Team.uuid;
     let teamPlayerId = 0;
     while (teamPlayerId in this.playersById) ++teamPlayerId;
@@ -91,7 +102,10 @@ export class Team {
       gameId: this.gameId,
       isAlive: true,
       lastUpdateTime: Date.now(),
-      playerBodyState: Team.getInitialPlayerBodyState({ color: this.color, teamPlayerId }),
+      playerBodyState: Team.getInitialPlayerBodyState({
+        color: this.color,
+        teamPlayerId,
+      }),
       teamId: this.color,
       teamPlayerId,
       uuid: Team.uuid,
@@ -102,12 +116,15 @@ export class Team {
 
   removePlayer(player: common.PlayerState) {
     const previousPlayerCount = this.players.length;
-    this.players = this.players.filter((existing) => player.teamPlayerId !== existing.teamPlayerId);
+    this.players = this.players.filter(
+      (existing) => player.teamPlayerId !== existing.teamPlayerId,
+    );
   }
 
   async respawn(opts: { delay: number; player: common.PlayerState }) {
     const { delay, player } = opts;
-    if (!this.playersByUuid[player.uuid]) throw new Error(`player uuid ${player.uuid} is not on this team!`);
+    if (!this.playersByUuid[player.uuid])
+      throw new Error(`player uuid ${player.uuid} is not on this team!`);
     await bluebird.delay(delay);
     const playerState = this.playersByUuid[player.uuid];
     playerState.playerBodyState = Team.getInitialPlayerBodyState({

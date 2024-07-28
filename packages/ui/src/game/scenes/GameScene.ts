@@ -1,7 +1,9 @@
+/// <reference types="vite/client" />
+
 import { Character } from "../character/Character";
 import {
-  KingClientMessage,
-  KingServerMessage,
+  KingToServerMessage,
+  KingToClientMessage,
   CentralGameState,
   PlayerStateByUuid,
   PlayerState,
@@ -60,6 +62,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   listen() {
+    // see vite/client types above
+    if (import.meta.hot) {
+      import.meta.hot.accept((_newModule) => {
+        window.location.reload();
+      });
+    }
     this.ws = new WebSocket(`ws://${window.location.host}/api`);
     const ws = this.ws;
     const gid = window.sessionStorage.getItem("gameId");
@@ -68,7 +76,7 @@ export class GameScene extends Phaser.Scene {
     ws.addEventListener("open", function open() {
       ws.send(
         JSON.stringify({
-          type: KingClientMessage.REQUEST_CHARACTER,
+          type: KingToServerMessage.REQUEST_CHARACTER,
           payload: {
             cached: {
               gid,
@@ -87,10 +95,10 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private logEvent(type: KingServerMessage, payload: any) {
+  private logEvent(type: KingToClientMessage, payload: any) {
     if (
-      type === KingServerMessage.UPDATE_GAME_STATE &&
-      this.eventLogState.lastEventType === KingServerMessage.UPDATE_GAME_STATE
+      type === KingToClientMessage.UPDATE_GAME_STATE &&
+      this.eventLogState.lastEventType === KingToClientMessage.UPDATE_GAME_STATE
     ) {
       return;
     }
@@ -138,12 +146,12 @@ export class GameScene extends Phaser.Scene {
     this.platforms = map.createLayer("platforms", tileset, 0, 0)!;
     this.tilesetLayers = [this.bg, this.bgDecor, this.platforms];
     this.tilesetLayers.forEach((layer) => {
-      const debugGraphics = this.add.graphics().setAlpha(0.75)
+      const debugGraphics = this.add.graphics().setAlpha(0.75);
       layer.renderDebug(debugGraphics, {
         tileColor: null, // Color of non-colliding tiles
         collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-        faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-      })
+        faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
+      });
       layer.setCollisionByProperty({ collides: true });
     });
     this.cameras.main.setBackgroundColor("rgb(130, 240, 255)"); // ){ r: 120, g: 120, b: 255, a: 0.5 })
@@ -212,20 +220,20 @@ export class GameScene extends Phaser.Scene {
     const { type, payload } = JSON.parse(data);
     this.logEvent(type, payload);
     switch (type) {
-      case KingServerMessage.ASSIGN_CHARACTER:
+      case KingToClientMessage.ASSIGN_CHARACTER:
         this.uuid = payload;
         break;
-      case KingServerMessage.HANDLE_PLAYER_DISCONNECTED:
+      case KingToClientMessage.HANDLE_PLAYER_DISCONNECTED:
         this.removePlayer(payload);
         break;
-      case KingServerMessage.KILL_PLAYER:
+      case KingToClientMessage.KILL_PLAYER:
         this.killPlayer(payload.uuid);
         break;
-      case KingServerMessage.UPDATE_GAME_STATE:
+      case KingToClientMessage.UPDATE_GAME_STATE:
         this.updateDebugWidget(payload);
         this.updateRemoteControlledGameState(payload);
         break;
-      case KingServerMessage.TEARDOWN:
+      case KingToClientMessage.TEARDOWN:
         this.bus.emit(GameMessages.GameShutdown);
         break;
       default:
@@ -239,8 +247,8 @@ export class GameScene extends Phaser.Scene {
     player1Object,
     player2Object,
   ) => {
-    if (!('body' in player1Object && 'body' in player2Object)) {
-      return
+    if (!("body" in player1Object && "body" in player2Object)) {
+      return;
     }
     const player1Body = player1Object.body as Phaser.Physics.Arcade.Body;
     const player2Body = player2Object.body as Phaser.Physics.Arcade.Body;
@@ -252,7 +260,7 @@ export class GameScene extends Phaser.Scene {
       if (player1Id && player2Id) break;
     }
     if (!player1Id || !player2Id) {
-      return
+      return;
     }
     const player1State = this.centralState.playerStateByUuid[player1Id];
     const player2State = this.centralState.playerStateByUuid[player2Id];
@@ -269,15 +277,17 @@ export class GameScene extends Phaser.Scene {
     // @TODO improve kill conditions!
     if (topPlayerBottomY <= bottomPlayerTopY) {
       const currentCharacters = Array.from(this.charactersByUuid.entries());
-      const [topId, _] = currentCharacters.find(
-        ([_, character]) => character.body === topPlayerBody,
-      ) ?? []; // eslint-disable-line
-      const [bottomId, __] = currentCharacters.find(
-        ([_, character]) => character.body === bottomPlayerBody,
-      )?? []; // eslint-disable-line
+      const [topId, _] =
+        currentCharacters.find(
+          ([_, character]) => character.body === topPlayerBody,
+        ) ?? []; // eslint-disable-line
+      const [bottomId, __] =
+        currentCharacters.find(
+          ([_, character]) => character.body === bottomPlayerBody,
+        ) ?? []; // eslint-disable-line
       this.ws.send(
         JSON.stringify({
-          type: KingClientMessage.KILL_PLAYER,
+          type: KingToServerMessage.KILL_PLAYER,
           payload: {
             killed: bottomId,
             killedBy: topId,
@@ -285,7 +295,7 @@ export class GameScene extends Phaser.Scene {
         }),
       );
     }
-  }
+  };
 
   update() {
     if (!this.track.isPlaying) this.track.play();
@@ -341,6 +351,8 @@ export class GameScene extends Phaser.Scene {
             : Object["values"](localBody.velocity)
                 .map((i) => i.toFixed(0))
                 .join(","),
+          flipX: localCharacter?.flipX,
+          animeation: body.currentAnimationName,
         };
       }
     }
@@ -437,7 +449,7 @@ export class GameScene extends Phaser.Scene {
   sendPlayerState() {
     this.ws.send(
       JSON.stringify({
-        type: KingClientMessage.PLAYER_BODY_STATE,
+        type: KingToServerMessage.PLAYER_BODY_STATE,
         payload: {
           position: this.currentPlayer.body.position,
           velocity: this.currentPlayer.body.velocity,

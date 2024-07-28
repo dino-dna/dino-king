@@ -1,4 +1,4 @@
-import fs from 'fs-extra'
-import { uiMapFilename, serverMapFilename } from './common'
+import fs from "fs-extra";
+import { uiMapFilename, serverMapFilename } from "./common";
 
-fs.copyFile(uiMapFilename, serverMapFilename)
+fs.copyFile(uiMapFilename, serverMapFilename);

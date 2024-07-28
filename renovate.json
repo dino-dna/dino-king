@@ -1,21 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "automerge": true,
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "packageRules": [
     {
       "groupName": "minor-updates",
-      "matchUpdateTypes": [
-        "minor"
-      ]
+      "matchUpdateTypes": ["minor"]
     },
     {
       "groupName": "major-updates",
-      "matchUpdateTypes": [
-        "major"
-      ]
+      "matchUpdateTypes": ["major"]
     }
   ]
 }

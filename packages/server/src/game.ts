@@ -36,7 +36,10 @@ export class Game {
   }
 
   get gameFull() {
-    return this.teamA.players.length + this.teamB.players.length >= this.maxPlayersPerTeam * 2;
+    return (
+      this.teamA.players.length + this.teamB.players.length >=
+      this.maxPlayersPerTeam * 2
+    );
   }
 
   getPlayerTeam(player: common.PlayerState) {
@@ -61,7 +64,10 @@ export class Game {
     let targetTeam: Team;
     if (!teamColor) {
       // assign to team with less players
-      targetTeam = this.teamA.players.length > this.teamB.players.length ? this.teamB : this.teamA;
+      targetTeam =
+        this.teamA.players.length > this.teamB.players.length
+          ? this.teamB
+          : this.teamA;
     } else {
       targetTeam = teamColor === "blue" ? this.teamA : this.teamB;
     }
@@ -74,7 +80,10 @@ export class Game {
     this.getPlayerTeam(player).removePlayer(player);
   }
 
-  setPlayerState(player: common.PlayerState, playerBodyState: common.PlayerBodyState) {
+  setPlayerState(
+    player: common.PlayerState,
+    playerBodyState: common.PlayerBodyState,
+  ) {
     player.playerBodyState = playerBodyState;
     player.lastUpdateTime = Date.now();
   }
@@ -86,7 +95,7 @@ export class Game {
       playerStateByUuid: Object.assign(
         {},
         this.teamA.playersByUuid,
-        this.teamB.playersByUuid
+        this.teamB.playersByUuid,
       ) as common.PlayerStateByUuid,
     };
   }

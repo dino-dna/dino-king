@@ -1,6 +1,12 @@
 import { debounce } from "lodash";
 import { Game } from "./game";
-import { KingClientMessage, KingServerMessage, PlayerState, DEATH_ANIMATION_DURATION } from "common";
+import {
+  KingToServerMessage,
+  KingToClientMessage,
+  PlayerState,
+  DEATH_ANIMATION_DURATION,
+  ToClient,
+} from "common";
 import pino from "pino";
 import WebSocket = require("ws");
 
@@ -34,7 +40,7 @@ export function onClose(ws: WebSocket) {
   log.info(`removing player ${player.uuid} from game ${player.gameId}`);
   game.removePlayer(player);
   broadcast(game, {
-    type: KingServerMessage.HANDLE_PLAYER_DISCONNECTED,
+    type: KingToClientMessage.HANDLE_PLAYER_DISCONNECTED,
     payload: player,
   });
 }
@@ -48,28 +54,28 @@ export function onMessage(raw: string, ws: WebSocket) {
   const broadcastGameState = () => {
     if (!game) return;
     broadcastDebounced(game, {
-      type: KingServerMessage.UPDATE_GAME_STATE,
+      type: KingToClientMessage.UPDATE_GAME_STATE,
       payload: game.state,
     });
   };
-  if (type === KingClientMessage.NEW_GAME) {
+  if (type === KingToServerMessage.NEW_GAME) {
     // create game in gamesById
-  } else if (type === KingClientMessage.REQUEST_CHARACTER) {
+  } else if (type === KingToServerMessage.REQUEST_CHARACTER) {
     const player = game.registerPlayer();
     playerAndGameBySocket.set(ws, [player, game]);
     log.debug(`created player`, player);
     emit(
       {
-        type: KingServerMessage.ASSIGN_CHARACTER,
+        type: KingToClientMessage.ASSIGN_CHARACTER,
         payload: player.uuid,
       },
-      ws
+      ws,
     );
     broadcastGameState();
-  } else if (type === KingClientMessage.PLAYER_BODY_STATE) {
+  } else if (type === KingToServerMessage.PLAYER_BODY_STATE) {
     game.setPlayerState(playerAndGameBySocket.get(ws)![0], payload);
     broadcastGameState();
-  } else if (type === KingClientMessage.KILL_PLAYER) {
+  } else if (type === KingToServerMessage.KILL_PLAYER) {
     const { killed, killedBy } = payload;
     const killedPlayer = game.getPlayer(killed);
     if (!killedPlayer) {
@@ -79,12 +85,13 @@ export function onMessage(raw: string, ws: WebSocket) {
       return log.warn(`played killed twice--omitting kill event`);
     }
     killedPlayer.isAlive = false;
-    if (killedPlayer.characterType === "knight") killedPlayer.characterType = "peon";
+    if (killedPlayer.characterType === "knight")
+      killedPlayer.characterType = "peon";
     const respawnedP = game
       .getPlayerTeam(killedPlayer)
       .respawn({ delay: DEATH_ANIMATION_DURATION, player: killedPlayer });
     broadcast(game, {
-      type: KingServerMessage.KILL_PLAYER,
+      type: KingToClientMessage.KILL_PLAYER,
       payload: { uuid: killed },
     });
     ++game.playerStateChangeCounter;
@@ -99,9 +106,13 @@ export function onMessage(raw: string, ws: WebSocket) {
 }
 
 // socket utils
-
-export const emit = (msg: object, ws: WebSocket) => ws.send(JSON.stringify(msg));
-export const broadcast = (game: Game, data: any, omitSocket: WebSocket | null = null) => {
+export const emit = (msg: ToClient, ws: WebSocket) =>
+  ws.send(JSON.stringify(msg));
+export const broadcast = (
+  game: Game,
+  data: ToClient,
+  omitSocket: WebSocket | null = null,
+) => {
   log.debug(Object.keys(game.state.playerStateByUuid).join(", "));
   const sent: Promise<void>[] = Array.from(wss.clients).map((ws) => {
     if (omitSocket && ws === omitSocket) return Promise.resolve();
@@ -111,7 +122,7 @@ export const broadcast = (game: Game, data: any, omitSocket: WebSocket | null = 
       ws.send(JSON.stringify(data), (err) => (err ? reject(err) : resolve()));
     });
   });
-  return Promise.all(sent);
+  return Promise.allSettled(sent);
 };
 
 export const broadcastDebounced = debounce(broadcast, 50, {
@@ -123,7 +134,10 @@ export const broadcastDebounced = debounce(broadcast, 50, {
     for (let game of Object.values(gamesById)) {
       log.info(`shutting down. broadcasting KingServerMessage.TEARDOWN`);
       try {
-        await broadcast(game, { type: KingServerMessage.TEARDOWN });
+        await broadcast(game, {
+          type: KingToClientMessage.TEARDOWN,
+          payload: null,
+        });
       } catch (err) {
         console.error(err);
         process.exit(1);

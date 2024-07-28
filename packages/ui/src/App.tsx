@@ -16,7 +16,7 @@ function assertNever(x: never): never {
 
 export const App: React.FC<{}> = (props) => {
   const [bus] = React.useState(new Nanobus());
-  (window as any).bus =bus
+  (window as any).bus = bus;
   const [gameContainer, setGameContainer] =
     React.useState<HTMLDivElement | null>(null);
   const [state, setState] = React.useState<GameState>({
