@@ -18,8 +18,8 @@ export class Character extends Phaser.GameObjects.Sprite {
   /**
    * @warn So this is a bit of a nightmare. Here's the scoop.
    * A Sprite can be flipped. However, flipping a sprite always flips the tile's
-   * image about it's true x center, _not_ the set x origin. That means that the the body
-   * get's flipped nicely about it's x origin, but the image is flipped about
+   * image about its true x center, _not_ the set x origin. That means that the the body
+   * get's flipped nicely about its x origin, but the image is flipped about
    * it's literal center. Thus, we need to adjust the body's position when we flip
    * the image so that the body is still in the right place relative to the image.
    * The values below are unscaled values.
@@ -29,7 +29,10 @@ export class Character extends Phaser.GameObjects.Sprite {
   private collisionBoxHeight: number = 100;
   private collisionBoxXOffset: number = 30;
   private collisionBoxYOffset = 30;
-  // @warn this value must correlate strictly to the image, not where you want the bounding box.
+
+  /**
+   * @warn this value must correlate strictly to the image, not where you want the bounding box.
+   */
   private kingXCenterOffsetPercentFromLeft: number = 0.35;
   private kingXCenterOffsetPxFromFromLeft: number =
     this.width * this.kingXCenterOffsetPercentFromLeft;
