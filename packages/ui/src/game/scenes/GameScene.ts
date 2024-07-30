@@ -8,6 +8,7 @@ import {
   PlayerStateByUuid,
   PlayerState,
   DEATH_ANIMATION_DURATION,
+  ToServer,
 } from "common";
 import Phaser from "phaser";
 import { TINTS } from "../pallette";
@@ -152,7 +153,7 @@ export class GameScene extends Phaser.Scene {
       });
       layer.setCollisionByProperty({ collides: true });
     });
-    this.cameras.main.setBackgroundColor("rgb(130, 240, 255)"); // ){ r: 120, g: 120, b: 255, a: 0.5 })
+    this.cameras.main.setBackgroundColor("rgb(130, 240, 255)");
     this.characterGroup = this.physics.add.group();
     this.listen();
   }
@@ -287,10 +288,9 @@ export class GameScene extends Phaser.Scene {
         JSON.stringify({
           type: KingToServerMessage.KILL_PLAYER,
           payload: {
-            killed: bottomId,
-            killedBy: topId,
+            killedId: bottomId!,
           },
-        }),
+        } satisfies ToServer),
       );
     }
   };
