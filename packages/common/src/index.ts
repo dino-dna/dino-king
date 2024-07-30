@@ -1,4 +1,9 @@
 export type TeamColor = "blue" | "orange";
+import WebSocket from "ws";
+import { GameListEntry } from "./models/game";
+
+export * from "./models/game";
+export * from "./ts/util";
 
 export type CentralGameState = {
   playerStateByUuid: PlayerStateByUuid;
@@ -28,6 +33,7 @@ export type PlayerState = {
   teamId: TeamColor;
   teamPlayerId: number;
   uuid: number;
+  socket: WebSocket;
 };
 
 export enum KingToServerMessage {
@@ -36,38 +42,45 @@ export enum KingToServerMessage {
   REQUEST_CHARACTER = "REQUEST_CHARACTER",
   REQUEST_PLAYERS = "REQUEST_PLAYERS",
   PLAYER_BODY_STATE = "PLAYER_BODY_STATE",
+  GET_GAMES = "GET_GAMES",
+  JOIN_GAME = "JOIN_GAME",
 }
 
 export type Msg<Id, Payload> = { type: Id; payload: Payload };
 
 export type ToServer =
-  | Msg<KingToServerMessage.KILL_PLAYER, number>
+  | Msg<KingToServerMessage.KILL_PLAYER, { killedId: number }>
   | Msg<KingToServerMessage.NEW_GAME, null>
-  | Msg<KingToServerMessage.REQUEST_CHARACTER, null>
+  | Msg<KingToServerMessage.REQUEST_CHARACTER, { gameId: number }>
   | Msg<KingToServerMessage.REQUEST_PLAYERS, null>
-  | Msg<KingToServerMessage.PLAYER_BODY_STATE, PlayerBodyState>;
+  | Msg<KingToServerMessage.PLAYER_BODY_STATE, PlayerBodyState>
+  | Msg<KingToServerMessage.GET_GAMES, null>
+  | Msg<KingToServerMessage.JOIN_GAME, { id: number }>;
 
-export enum KingToClientMessage {
-  ASSIGN_CHARACTER = "ASSIGN_CHARACTER",
-  HANDLE_NEW_PLAYER = "HANDLE_NEW_PLAYER",
-  HANDLE_PLAYER_DISCONNECTED = "HANDLE_PLAYER_DISCONNECTED",
-  KILL_PLAYER = "KILL_PLAYER",
-  PLAYER_REGISTRATIONS = "PLAYER_REGISTRATIONS",
-  SERVER_PLAYERS = "SERVER_PLAYERS",
-  TEARDOWN = "TEARDOWN",
-  UPDATE_GAME_STATE = "UPDATE_GAME_STATE",
-  UPDATE_PLAYER_STATE = "UPDATE_PLAYER_STATE",
-}
+export type KingToClientMessage =
+  | "JOIN_GAME_RESULT"
+  | "ALL_GAMES"
+  | "ASSIGN_CHARACTER"
+  | "HANDLE_NEW_PLAYER"
+  | "HANDLE_PLAYER_DISCONECTED"
+  | "KILL_PLAYER"
+  | "PLAYER_REGISTRATION"
+  | "SERVER_PLAYERS"
+  | "TEARDOWN"
+  | "UPDATE_GAME_STATE"
+  | "UPDATE_PLAYER_STATE";
 
 export type ToClient =
-  | Msg<KingToClientMessage.ASSIGN_CHARACTER, number>
-  | Msg<KingToClientMessage.HANDLE_NEW_PLAYER, PlayerState>
-  | Msg<KingToClientMessage.HANDLE_PLAYER_DISCONNECTED, PlayerState>
-  | Msg<KingToClientMessage.KILL_PLAYER, { uuid: number }>
-  | Msg<KingToClientMessage.PLAYER_REGISTRATIONS, PlayerState[]>
-  | Msg<KingToClientMessage.SERVER_PLAYERS, PlayerState[]>
-  | Msg<KingToClientMessage.TEARDOWN, null>
-  | Msg<KingToClientMessage.UPDATE_GAME_STATE, CentralGameState>
-  | Msg<KingToClientMessage.UPDATE_PLAYER_STATE, PlayerState>;
+  | Msg<"JOIN_GAME_RESULT", { ok: boolean; error?: string }>
+  | Msg<"ALL_GAMES", GameListEntry[]>
+  | Msg<"ASSIGN_CHARACTER", number | { error: string }>
+  | Msg<"HANDLE_NEW_PLAYER", PlayerState>
+  | Msg<"HANDLE_PLAYER_DISCONNECTED", PlayerState>
+  | Msg<"KILL_PLAYER", { uuid: number }>
+  | Msg<"PLAYER_REGISTRATIONS", PlayerState[]>
+  | Msg<"SERVER_PLAYERS", PlayerState[]>
+  | Msg<"TEARDOWN", null>
+  | Msg<"UPDATE_GAME_STATE", CentralGameState>
+  | Msg<"UPDATE_PLAYER_STATE", PlayerState>;
 
 export const DEATH_ANIMATION_DURATION = 3000;

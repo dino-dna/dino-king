@@ -10,29 +10,28 @@ import * as gameScene from "./scenes/GameScene";
 // let bears: Array<Bear> = []
 // let queens: Array<Queen> = []
 
-export const config: Phaser.Types.Core.GameConfig = {
-  backgroundColor: "#98d687",
-  input: { keyboard: true },
-  parent: "game",
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 300 },
-      debug: true,
-    },
-  },
-  scene: gameScene.GameScene,
-  title: "Murder King",
-  type: Phaser.AUTO,
-  version: "1.0",
-  width: 1280,
-  height: 720,
-  zoom: 1,
-};
-
-export class MurderKing extends Game {
+export class DinoKing extends Game {
   // eslint-disable-next-line
-  constructor(config: Phaser.Types.Core.GameConfig) {
+  constructor({ gameId }: { gameId: number }) {
+    const config: Phaser.Types.Core.GameConfig = {
+      backgroundColor: "#98d687",
+      input: { keyboard: true },
+      parent: "game",
+      physics: {
+        default: "arcade",
+        arcade: {
+          gravity: { x: 0, y: 300 },
+          debug: true,
+        },
+      },
+      scene: gameScene.GameScene,
+      title: "Dino King",
+      type: Phaser.AUTO,
+      version: "1.0",
+      width: 1280,
+      height: 720,
+      zoom: 1,
+    };
     super(config);
   }
 }

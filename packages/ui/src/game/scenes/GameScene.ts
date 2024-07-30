@@ -68,25 +68,23 @@ export class GameScene extends Phaser.Scene {
         window.location.reload();
       });
     }
-    this.ws = new WebSocket(`ws://${window.location.host}/api`);
+    this.ws = (window as any).ws as WebSocket; // new WebSocket(`ws://${window.location.host}/api`);
     const ws = this.ws;
     const gid = window.sessionStorage.getItem("gameId");
     const tid = window.sessionStorage.getItem("teamId");
     const uid = window.sessionStorage.getItem("userId");
-    ws.addEventListener("open", function open() {
-      ws.send(
-        JSON.stringify({
-          type: KingToServerMessage.REQUEST_CHARACTER,
-          payload: {
-            cached: {
-              gid,
-              tid,
-              uid,
-            },
+    ws.send(
+      JSON.stringify({
+        type: KingToServerMessage.REQUEST_CHARACTER,
+        payload: {
+          cached: {
+            gid,
+            tid,
+            uid,
           },
-        }),
-      );
-    });
+        },
+      }),
+    );
     ws.addEventListener("error", (evt: Event) => {
       this.bus.emit(GameMessages.SocketError);
     });
@@ -97,8 +95,8 @@ export class GameScene extends Phaser.Scene {
 
   private logEvent(type: KingToClientMessage, payload: any) {
     if (
-      type === KingToClientMessage.UPDATE_GAME_STATE &&
-      this.eventLogState.lastEventType === KingToClientMessage.UPDATE_GAME_STATE
+      type === "UPDATE_GAME_STATE" &&
+      this.eventLogState.lastEventType === "UPDATE_GAME_STATE"
     ) {
       return;
     }
@@ -220,20 +218,20 @@ export class GameScene extends Phaser.Scene {
     const { type, payload } = JSON.parse(data);
     this.logEvent(type, payload);
     switch (type) {
-      case KingToClientMessage.ASSIGN_CHARACTER:
+      case "ASSIGN_CHARACTER":
         this.uuid = payload;
         break;
-      case KingToClientMessage.HANDLE_PLAYER_DISCONNECTED:
+      case "HANDLE_PLAYER_DISCONNECTED":
         this.removePlayer(payload);
         break;
-      case KingToClientMessage.KILL_PLAYER:
+      case "KILL_PLAYER":
         this.killPlayer(payload.uuid);
         break;
-      case KingToClientMessage.UPDATE_GAME_STATE:
+      case "UPDATE_GAME_STATE":
         this.updateDebugWidget(payload);
         this.updateRemoteControlledGameState(payload);
         break;
-      case KingToClientMessage.TEARDOWN:
+      case "TEARDOWN":
         this.bus.emit(GameMessages.GameShutdown);
         break;
       default:

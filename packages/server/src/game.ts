@@ -1,3 +1,4 @@
+import WebSocket from "ws";
 import * as common from "common";
 import { Team } from "./team";
 import pino from "pino";
@@ -5,6 +6,7 @@ import pino from "pino";
 export type GameOptions = {
   id: number;
   log: pino.Logger;
+  name?: string;
 };
 
 export class Game {
@@ -14,9 +16,11 @@ export class Game {
   public id: number;
   public playerStateChangeCounter: number = 0;
   public log: pino.Logger;
+  public name: string;
 
   constructor(opts: GameOptions) {
     this.id = opts.id;
+    this.name = opts.name || `Game ${this.id}`;
     this.maxPlayersPerTeam = 5;
     this.log = opts.log;
     this.teamA = new Team({
@@ -35,10 +39,14 @@ export class Game {
     });
   }
 
+  get maxNumPlayers() {
+    return this.maxPlayersPerTeam * 2;
+  }
+
   get gameFull() {
     return (
       this.teamA.players.length + this.teamB.players.length >=
-      this.maxPlayersPerTeam * 2
+      this.maxNumPlayers
     );
   }
 
@@ -60,7 +68,7 @@ export class Game {
     return this.teamA.getPlayer(uuid) || this.teamB.getPlayer(uuid);
   }
 
-  registerPlayer(teamColor?: common.TeamColor) {
+  registerPlayer(socket: WebSocket, teamColor?: common.TeamColor) {
     let targetTeam: Team;
     if (!teamColor) {
       // assign to team with less players
@@ -72,7 +80,7 @@ export class Game {
       targetTeam = teamColor === "blue" ? this.teamA : this.teamB;
     }
     ++this.playerStateChangeCounter;
-    return targetTeam.registerPlayer();
+    return targetTeam.registerPlayer(socket);
   }
 
   removePlayer(player: common.PlayerState) {

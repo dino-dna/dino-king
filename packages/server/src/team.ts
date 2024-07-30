@@ -1,3 +1,4 @@
+import WebSocket from "ws";
 import * as common from "common";
 import { TeamFullError } from "./errors";
 import pino from "pino";
@@ -90,9 +91,11 @@ export class Team {
     }, {} as common.PlayerStateByUuid);
   }
 
-  registerPlayer() {
+  registerPlayer(
+    socket: WebSocket,
+  ): { ok: true; value: common.PlayerState } | { ok: false; value: Error } {
     if (this.isFull) {
-      throw new TeamFullError();
+      return { ok: false, value: new TeamFullError() };
     }
     ++Team.uuid;
     let teamPlayerId = 0;
@@ -109,9 +112,14 @@ export class Team {
       teamId: this.color,
       teamPlayerId,
       uuid: Team.uuid,
+      socket: null as any,
     };
+    Object.defineProperty(player, "socket", {
+      value: socket,
+      enumerable: false,
+    });
     this.players.push(player);
-    return player;
+    return { ok: true, value: player };
   }
 
   removePlayer(player: common.PlayerState) {
@@ -127,11 +135,13 @@ export class Team {
       throw new Error(`player uuid ${player.uuid} is not on this team!`);
     await bluebird.delay(delay);
     const playerState = this.playersByUuid[player.uuid];
-    playerState.playerBodyState = Team.getInitialPlayerBodyState({
-      color: this.color,
-      teamPlayerId: player.teamPlayerId,
-    });
-    playerState.isAlive = true;
-    return this.log.info(`player ${player.uuid} is respawning`);
+    if (playerState) {
+      playerState.playerBodyState = Team.getInitialPlayerBodyState({
+        color: this.color,
+        teamPlayerId: player.teamPlayerId,
+      });
+      playerState.isAlive = true;
+      return this.log.info(`player ${player.uuid} is respawning`);
+    }
   }
 }

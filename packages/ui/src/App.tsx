@@ -1,75 +1,32 @@
-import "./App.css";
-import * as React from "react";
-import { MurderKing, config as gameConfig } from "./game/index";
-import { GameMessages, GameState } from "./interfaces";
-import cx from "classnames";
-import { Banner } from "./Banner";
-import Nanobus from "nanobus";
+import React from "react";
+import GameLobby from "./GameLobby";
+import { Provider } from "./hooks/bus";
+const DinoKingView = React.lazy(() => import("./DinoKingView"));
 
-export interface IAppState {
-  gameState: GameState;
-}
-
-function assertNever(x: never): never {
-  throw new Error("Unexpected object: " + x);
-}
-
-export const App: React.FC<{}> = (props) => {
-  const [bus] = React.useState(new Nanobus());
-  (window as any).bus = bus;
-  const [gameContainer, setGameContainer] =
-    React.useState<HTMLDivElement | null>(null);
-  const [state, setState] = React.useState<GameState>({
-    error: false,
-    type: "Starting",
-  });
-  const [game, setGame] = React.useState<MurderKing | null>(null);
-  React.useEffect(() => {
-    bus.on(GameMessages.SocketError, () => {
-      setState({ error: true, type: "SocketError" });
-    });
-    bus.on(GameMessages.GameShutdown, () => {
-      setState({ error: false, type: "Stopped" });
-    });
-    const game = new MurderKing(gameConfig);
-    setGame(game);
-    (window as any).game = game;
+export const App: React.FC = () => {
+  const flags = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return Object.fromEntries(params);
   }, []);
-  const { type, error } = state;
-  const isGameRunning = !error && type !== "Stopped";
-  const gameStateClassNames = cx("game-state__pane", {
-    "game-state__pane--visible": isGameRunning,
-  });
-  let banner;
-  let gameNode;
-  let greatSuff;
-
-  switch (type) {
-    case "Running":
-    case "Starting":
-      gameNode = <div id="game" ref={setGameContainer} />;
-      break;
-    case "SocketError":
-      banner = <Banner children={type} />;
-      break;
-    case "Stopped":
-      greatSuff = <p>Sup dawgs! Join a game</p>;
-      break;
-    default:
-      // https://www.typescriptlang.org/docs/handbook/advanced-types.html
-      // see exhaustive checking
-      return assertNever(type);
-  }
-  const appClassnames = cx("App", {
-    "App--error": !!error,
-    "App--running": isGameRunning,
-  });
+  const [candidateGameId, setCandidateGameId] = React.useState<number | null>(
+    null,
+  );
   return (
-    <div className={appClassnames}>
-      {banner}
-      {isGameRunning && gameNode}
-      {greatSuff}
-      <pre id="game_state" className={gameStateClassNames} />
-    </div>
+    <Provider>
+      {candidateGameId ? (
+        <DinoKingView
+          gameId={candidateGameId}
+          onExit={() => {
+            setCandidateGameId(null);
+          }}
+        />
+      ) : (
+        <GameLobby
+          onJoin={(id) => {
+            setCandidateGameId(id);
+          }}
+        />
+      )}
+    </Provider>
   );
 };

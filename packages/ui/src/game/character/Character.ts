@@ -36,13 +36,14 @@ export class Character extends Phaser.GameObjects.Sprite {
   private kingXCenterOffsetPercentFromLeft: number = 0.35;
   private kingXCenterOffsetPxFromFromLeft: number =
     this.width * this.kingXCenterOffsetPercentFromLeft;
-  private kingXCenterOffsetPxFromRight: number = this.width - this.kingXCenterOffsetPxFromFromLeft;
+  private kingXCenterOffsetPxFromRight: number =
+    this.width - this.kingXCenterOffsetPxFromFromLeft;
 
   /**
    * flipX true center px  - flipX false center px
    */
-  private spriteFlippedXCenterDeltaPx = this.kingXCenterOffsetPxFromRight -
-    this.kingXCenterOffsetPxFromFromLeft;
+  private spriteFlippedXCenterDeltaPx =
+    this.kingXCenterOffsetPxFromRight - this.kingXCenterOffsetPxFromFromLeft;
 
   constructor(params: CharacterInitOptions) {
     super(params.scene, params.x, params.y, params.texture, params.frame);
@@ -61,8 +62,7 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.canFlap = true;
     this.body.setBounce(0, 0);
 
-
-    this.spriteFlippedXCenterDeltaPx
+    this.spriteFlippedXCenterDeltaPx;
 
     // input
     this.jumpKey = params.scene.input.keyboard!.addKey(
@@ -78,18 +78,15 @@ export class Character extends Phaser.GameObjects.Sprite {
     if (this.flipX) {
       if (this.handledXFlip) return;
       this.handledXFlip = true;
-      this.body.position.x -= this.spriteFlippedXCenterDeltaPx *this.scale;
+      this.body.position.x -= this.spriteFlippedXCenterDeltaPx * this.scale;
       this.body.setOffset(
-        (this.width - this.collisionBoxWidth - this.collisionBoxXOffset),
-        (this.collisionBoxYOffset),
+        this.width - this.collisionBoxWidth - this.collisionBoxXOffset,
+        this.collisionBoxYOffset,
       );
     } else {
       this.handledXFlip = false;
       if (this.body.offset.x === this.collisionBoxXOffset) return;
-      this.body.setOffset(
-        this.collisionBoxXOffset,
-        this.collisionBoxYOffset
-      );
+      this.body.setOffset(this.collisionBoxXOffset, this.collisionBoxYOffset);
       this.body.position.x += this.spriteFlippedXCenterDeltaPx * this.scale;
     }
   }

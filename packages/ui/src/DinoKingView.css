@@ -1,25 +1,18 @@
-.App {
+.DinoKingView {
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
 }
 
-.App--error {
+.DinoKingView--error {
   display: block;
 }
 
-.App--running {
+.DinoKingView--running {
   background-color: black;
 }
 
-.banner__state--error {
-  background: white;
-  border-radius: 2px;
-  opacity: 0.5;
-  padding: 10px;
-  width: 100%;
-}
 
 #game > * {
   width: 100vw;
