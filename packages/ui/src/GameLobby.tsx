@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import GameList from "./GameList";
-import { useReceiveMsg, useReqRes, useSendMsg } from "./hooks/bus";
+import { useReceiveMsg, useReqRes, useSendMsg } from "./hooks/client";
 import { GameListEntry, KingToServerMessage } from "common";
 import Spinner from "./componentlib/Spinner";
 import Banner from "./componentlib/Banner";
@@ -38,16 +38,16 @@ const GameLobby: React.FC<GameLobbyProps> = ({ onJoin }) => {
     },
   );
 
-  console.log({
-    isJoining,
-    isJoiningQueryEnabled: !!selectedGame,
-    selectedGame,
-    isLoadingGames,
-    games,
-    gamesError,
-    joinedResult,
-    joinGameError,
-  });
+  // console.log({
+  //   isJoining,
+  //   isJoiningQueryEnabled: !!selectedGame,
+  //   selectedGame,
+  //   isLoadingGames,
+  //   games,
+  //   gamesError,
+  //   joinedResult,
+  //   joinGameError,
+  // });
 
   const joinOk = joinedResult?.ok;
   const selectedId = selectedGame?.id ?? -1;

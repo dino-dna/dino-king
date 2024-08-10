@@ -1,6 +1,6 @@
 import React from "react";
 import GameLobby from "./GameLobby";
-import { Provider } from "./hooks/bus";
+import { Provider } from "./hooks/client";
 const DinoKingView = React.lazy(() => import("./DinoKingView"));
 
 export const App: React.FC = () => {

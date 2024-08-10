@@ -44,6 +44,7 @@
     "vite": "5.3.5"
   },
   "dependencies": {
+    "colyseus.js": "^0.15.25",
     "classnames": "^2.5.1",
     "common": "workspace:*",
     "http-proxy-middleware": "^0.21.0",

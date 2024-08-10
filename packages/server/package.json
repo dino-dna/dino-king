@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.5",
+    "colyseus": "^0.15.7",
     "common": "workspace:*",
     "lodash": "^4.17.11",
     "pino": "^5.12.6",
