@@ -1,7 +1,218 @@
-html, body, #root, .App {
+:root {
+  /* Colors */
+  --color-primary: #4CAF50; /* Lush Green */
+  --color-secondary: #8BC34A; /* Light Green */
+  --color-accent: #FF9800; /* Bright Orange */
+  --color-background: #FFFFFF; /* White */
+  --color-foreground: #212121; /* Dark Gray */
+  --color-sky: #03A9F4; /* Sky Blue */
+  --color-earth: #795548; /* Earth Brown */
+  --color-grass: #388E3C; /* Dark Green */
+  --color-sun: #FFC107; /* Sun Yellow */
+  --color-water: #0288D1; /* Water Blue */
+
+  /* Typography */
+  --font-family-sans: 'Helvetica Neue', Arial, sans-serif;
+  --font-family-serif: 'Georgia', serif;
+  --font-size-base: 16px;
+  --font-size-large: 24px;
+  --font-size-small: 12px;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --line-height-base: 1.5;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.16);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.19);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease-in-out;
+  --transition-medium: 0.4s ease-in-out;
+  --transition-slow: 0.6s ease-in-out;
+}
+
+#root {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
   overflow: hidden;
   height: 100vh;
+}
+
+/* Example usage */
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-serif);
+  color: var(--color-primary);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+button {
+  background-color: var(--color-accent);
+  color: var(--color-background);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+button:hover {
+  background-color: var(--color-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+#lobby {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "lobby_nav lobby_nav"
+    "lobby_notification lobby_notification"
+    "lobby_left lobby_right";
+  height: 100vh;
+  width: 100vw;
+}
+
+#lobby_nav {
+  grid-area: lobby_nav;
+  background-color: #f8f9fa; /* Example background color */
+  padding: 8px;
+
+}
+
+
+/* start:nav */
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap'); /* Thick, blocky font */
+
+#lobby_nav {
+  grid-area: lobby_nav;
+  background-color: var(--color-primary); /* Using theme color */
+  color: var(--color-background); /* Text color */
+  padding: var(--spacing-sm); /* Reduced padding */
+  box-shadow: var(--shadow-sm); /* Shadow */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  gap: var(--spacing-lg); /* Space between title and nav items */
+}
+
+#lobby_nav .game-title {
+  font-family: 'Bangers', sans-serif; /* Thick, blocky font */
+  font-size: calc(var(--font-size-large) * 1.5); /* Larger font size */
+  font-weight: var(--font-weight-bold); /* Bold font weight */
+  color: var(--color-sun); /* Bright sun yellow color */
+  text-shadow: 2px 2px var(--color-earth); /* Earthy shadow for a fun effect */
+  display: flex;
+  align-items: center;
+}
+
+#lobby_nav .game-title .dino {
+  transform: rotate(-10deg); /* Slight rotation for "dino" */
+  display: inline-block;
+}
+
+#lobby_nav .game-title .king {
+  transform: rotate(10deg); /* Slight rotation for "king" */
+  display: inline-block;
+}
+
+#lobby_nav .sub-nav {
+  display: flex;
+  gap: var(--spacing-md); /* Spacing between links */
+  list-style: none; /* Remove bullets */
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+}
+
+#lobby_nav .sub-nav a {
+  cursor: pointer;
+  font-family: var(--font-family-sans); /* Sans-serif for readability */
+  font-size: var(--font-size-base); /* Base font size */
+  color: var(--color-background); /* Text color */
+  text-decoration: none; /* Remove underline */
+  padding: var(--spacing-xs) var(--spacing-sm); /* Padding for clickable area */
+  border-radius: var(--border-radius-sm); /* Rounded corners */
+  transition: background-color var(--transition-fast); /* Smooth transition */
+}
+
+#lobby_nav .sub-nav a:hover {
+  background-color: var(--color-accent); /* Change background on hover */
+  color: var(--color-background); /* Ensure text color contrast */
+}
+/* end:nav */
+
+#lobby_notification {
+  grid-area: lobby_notification;
+  background-color: var(--color-secondary); /* Using theme color */
+  color: var(--color-background); /* Text color */
+  padding: var(--spacing-md); /* Spacing */
+  box-shadow: var(--shadow-sm); /* Shadow */
+}
+
+
+#lobby_notification.off {
+  height: 0;
+}
+
+#lobby_notification.on {
+  grid-area: lobby_notification;
+  background-color: #f8f9fa; /* Example background color */
+  height: 48px;
+}
+
+#lobby_left {
+  grid-area: lobby_left;
+  background-color: var(--color-grass); /* Using theme color */
+  color: var(--color-background); /* Text color */
+  padding: var(--spacing-md); /* Spacing */
+  box-shadow: var(--shadow-md); /* Shadow */
+  overflow-y: auto; /* Scrollable list */
+}
+
+#lobby_right {
+  grid-area: lobby_right;
+  background-color: var(--color-sky); /* Using theme color */
+  color: var(--color-foreground); /* Text color */
+  padding: var(--spacing-md); /* Spacing */
+  box-shadow: var(--shadow-md); /* Shadow */
+}
+
+#lobby .play-button {
+  padding: 20px 40px; /* Increased padding */
+  font-size: 30px; /* Increased font size */
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 10px; /* Increased border radius */
+  cursor: pointer;
+}
+
+#lobby .play-button:hover {
+  background-color: #0056b3;
 }

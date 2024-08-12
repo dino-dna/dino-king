@@ -4,10 +4,11 @@
   "main": "./src/bin.js",
   "license": "MIT",
   "scripts": {
+    "start": "node ./dist/bin.js",
     "build:map": "ts-node scripts/map.ts",
     "clean": "del '{src,scripts}/**/*.{map,js}'",
     "prestart": "run-p clean build:map",
-    "start": "nodemon --exec ts-node ./src/bin.ts"
+    "dev": "nodemon --exec ts-node ./src/bin.ts"
   },
   "dependencies": {
     "bluebird": "^3.5.5",

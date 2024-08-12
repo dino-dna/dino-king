@@ -1,6 +1,7 @@
 import React from "react";
 import GameLobby from "./GameLobby";
 import { Provider } from "./hooks/bus";
+import { RootLayout } from "./componentlib/RootLayout";
 const DinoKingView = React.lazy(() => import("./DinoKingView"));
 
 export const App: React.FC = () => {
@@ -21,11 +22,13 @@ export const App: React.FC = () => {
           }}
         />
       ) : (
-        <GameLobby
-          onJoin={(id) => {
-            setCandidateGameId(id);
-          }}
-        />
+        <RootLayout>
+          <GameLobby
+            onJoin={(id) => {
+              setCandidateGameId(id);
+            }}
+          />
+        </RootLayout>
       )}
     </Provider>
   );
