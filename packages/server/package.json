@@ -22,7 +22,7 @@
     "@types/bluebird": "^3.5.27",
     "@types/fs-extra": "^7.0.0",
     "@types/lodash": "^4.14.134",
-    "@types/node": "20.14.12",
+    "@types/node": "20.14.15",
     "@types/pino": "^5.8.8",
     "@types/ws": "^8.5.11",
     "del-cli": "~2.0.0",
