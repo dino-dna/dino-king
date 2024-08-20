@@ -138,7 +138,7 @@ importers:
         version: 4.6.2(eslint@8.57.0)
       eslint-plugin-react-refresh:
         specifier: ^0.4.7
-        version: 0.4.9(eslint@8.57.0)
+        version: 0.4.10(eslint@8.57.0)
       fs-extra:
         specifier: ^8.0.1
         version: 8.1.0
@@ -163,9 +163,6 @@ importers:
       rollup-plugin-visualizer:
         specifier: 5.12.0
         version: 5.12.0(rollup@2.79.1)
-      sass-embedded:
-        specifier: 1.77.8
-        version: 1.77.8
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -3316,8 +3313,8 @@ packages:
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
 
-  eslint-plugin-react-refresh@0.4.9:
-    resolution: {integrity: sha512-QK49YrBAo5CLNLseZ7sZgvgTy21E6NEw22eZqc4teZfH8pxV3yXc9XXOYfUI6JNpw7mfHNkAeWtBxrTyykB6HA==}
+  eslint-plugin-react-refresh@0.4.10:
+    resolution: {integrity: sha512-I39s6G9We7ZxbCRxTTM5XX4KJV2cfWhFbHF4kTuL0ygdEVdQXtCNGqUQ43sBOCbTC/N6dEZXoQKFHr8gp1VHrQ==}
     peerDependencies:
       eslint: '>=7'
 
@@ -8410,7 +8407,8 @@ snapshots:
   '@biomejs/cli-win32-x64@1.8.3':
     optional: true
 
-  '@bufbuild/protobuf@1.10.0': {}
+  '@bufbuild/protobuf@1.10.0':
+    optional: true
 
   '@carbon/colors@11.24.0':
     dependencies:
@@ -10118,7 +10116,8 @@ snapshots:
     dependencies:
       node-int64: 0.4.0
 
-  buffer-builder@0.2.0: {}
+  buffer-builder@0.2.0:
+    optional: true
 
   buffer-from@1.1.2: {}
 
@@ -11148,7 +11147,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-react-refresh@0.4.9(eslint@8.57.0):
+  eslint-plugin-react-refresh@0.4.10(eslint@8.57.0):
     dependencies:
       eslint: 8.57.0
 
@@ -14474,6 +14473,7 @@ snapshots:
   rxjs@7.8.1:
     dependencies:
       tslib: 2.6.3
+    optional: true
 
   safe-array-concat@1.1.2:
     dependencies:
@@ -14577,6 +14577,7 @@ snapshots:
       sass-embedded-win32-arm64: 1.77.8
       sass-embedded-win32-ia32: 1.77.8
       sass-embedded-win32-x64: 1.77.8
+    optional: true
 
   sass-loader@12.6.0(sass-embedded@1.77.8)(sass@1.77.8)(webpack@5.93.0):
     dependencies:
@@ -15470,7 +15471,8 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  varint@6.0.0: {}
+  varint@6.0.0:
+    optional: true
 
   vary@1.1.2: {}
 
