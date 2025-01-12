@@ -7,6 +7,9 @@ import Banner from "./componentlib/Banner";
 import { Column, TextInput } from "@carbon/react";
 import useLobbyChiptune from "./hooks/useLobbyChiptune";
 import { Overlay } from "./componentlib/Overlay";
+import { Link } from "react-router-dom";
+
+const Attribution = React.lazy(() => import("./Attribution"));
 
 interface GameLobbyProps {
   onJoin: (gameId: number) => void;
@@ -39,17 +42,6 @@ const GameLobby: React.FC<GameLobbyProps> = ({ onJoin }) => {
       enabled: !!selectedGame,
     },
   );
-
-  console.log({
-    isJoining,
-    isJoiningQueryEnabled: !!selectedGame,
-    selectedGame,
-    isLoadingGames,
-    games,
-    gamesError,
-    joinedResult,
-    joinGameError,
-  });
 
   const joinOk = joinedResult?.ok;
   const selectedId = selectedGame?.id ?? -1;
@@ -84,23 +76,22 @@ const GameLobby: React.FC<GameLobbyProps> = ({ onJoin }) => {
           </button>
         </Overlay>
       ) : null}
-      <div id="lobby_nav">
+      <div id="app_nav">
         <span className="game-title">
           <span className="dino">Dino</span>
           <span className="king">King</span>
         </span>
         <ul className="sub-nav">
-          {["a", "b", "c"].map((it) => (
-            <li key={it}>
-              <a>{it}</a>
-            </li>
+          {/* biome-ignore lint/correctness/useJsxKeyInIterable: well, it's wrong. */}
+          {[<Link to="/attribution">Attribution</Link>].map((el, i) => (
+            <li key={String(i)}>{el}</li>
           ))}
         </ul>
       </div>
-      <div id="lobby_notification" className={bannerContent ? "on" : "off"}>
+      <div id="app_notification" className={bannerContent ? "on" : "off"}>
         {bannerContent}
       </div>
-      <div id="lobby_left">
+      <div id="app_left">
         {isLoadingGames ? (
           <Spinner />
         ) : games ? (
@@ -113,7 +104,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({ onJoin }) => {
           />
         ) : null}
       </div>
-      <div id="lobby_right">
+      <div id="app_right">
         <TextInput
           id="username"
           onChange={(evt) => setUserName(evt.currentTarget.value)}

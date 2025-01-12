@@ -20,3 +20,5 @@ export const Attribution: React.FCC = () => {
     </div>
   );
 };
+
+export default Attribution;

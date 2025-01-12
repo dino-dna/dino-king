@@ -92,15 +92,15 @@ button:hover {
   grid-template-rows: auto auto 1fr;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    "lobby_nav lobby_nav"
-    "lobby_notification lobby_notification"
-    "lobby_left lobby_right";
+    "app_nav app_nav"
+    "app_notification app_notification"
+    "app_left app_right";
   height: 100vh;
   width: 100vw;
 }
 
-#lobby_nav {
-  grid-area: lobby_nav;
+#app_nav {
+  grid-area: app_nav;
   background-color: #f8f9fa; /* Example background color */
   padding: 8px;
 
@@ -110,8 +110,8 @@ button:hover {
 /* start:nav */
 @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap'); /* Thick, blocky font */
 
-#lobby_nav {
-  grid-area: lobby_nav;
+#app_nav {
+  grid-area: app_nav;
   background-color: var(--color-primary); /* Using theme color */
   color: var(--color-background); /* Text color */
   padding: var(--spacing-sm); /* Reduced padding */
@@ -122,7 +122,7 @@ button:hover {
   gap: var(--spacing-lg); /* Space between title and nav items */
 }
 
-#lobby_nav .game-title {
+#app_nav .game-title {
   font-family: 'Bangers', sans-serif; /* Thick, blocky font */
   font-size: calc(var(--font-size-large) * 1.5); /* Larger font size */
   font-weight: var(--font-weight-bold); /* Bold font weight */
@@ -132,17 +132,17 @@ button:hover {
   align-items: center;
 }
 
-#lobby_nav .game-title .dino {
+#app_nav .game-title .dino {
   transform: rotate(-10deg); /* Slight rotation for "dino" */
   display: inline-block;
 }
 
-#lobby_nav .game-title .king {
+#app_nav .game-title .king {
   transform: rotate(10deg); /* Slight rotation for "king" */
   display: inline-block;
 }
 
-#lobby_nav .sub-nav {
+#app_nav .sub-nav {
   display: flex;
   gap: var(--spacing-md); /* Spacing between links */
   list-style: none; /* Remove bullets */
@@ -150,7 +150,7 @@ button:hover {
   margin: 0; /* Remove default margin */
 }
 
-#lobby_nav .sub-nav a {
+#app_nav .sub-nav a {
   cursor: pointer;
   font-family: var(--font-family-sans); /* Sans-serif for readability */
   font-size: var(--font-size-base); /* Base font size */
@@ -161,33 +161,33 @@ button:hover {
   transition: background-color var(--transition-fast); /* Smooth transition */
 }
 
-#lobby_nav .sub-nav a:hover {
+#app_nav .sub-nav a:hover {
   background-color: var(--color-accent); /* Change background on hover */
   color: var(--color-background); /* Ensure text color contrast */
 }
 /* end:nav */
 
-#lobby_notification {
-  grid-area: lobby_notification;
+#app_notification {
+  grid-area: app_notification;
   background-color: var(--color-secondary); /* Using theme color */
   color: var(--color-background); /* Text color */
-  padding: var(--spacing-md); /* Spacing */
+  /* padding: var(--spacing-md); Spacing */
   box-shadow: var(--shadow-sm); /* Shadow */
 }
 
 
-#lobby_notification.off {
+#app_notification.off {
   height: 0;
 }
 
-#lobby_notification.on {
-  grid-area: lobby_notification;
+#app_notification.on {
+  grid-area: app_notification;
   background-color: #f8f9fa; /* Example background color */
   height: 48px;
 }
 
-#lobby_left {
-  grid-area: lobby_left;
+#app_left {
+  grid-area: app_left;
   background-color: var(--color-grass); /* Using theme color */
   color: var(--color-background); /* Text color */
   padding: var(--spacing-md); /* Spacing */
@@ -195,8 +195,8 @@ button:hover {
   overflow-y: auto; /* Scrollable list */
 }
 
-#lobby_right {
-  grid-area: lobby_right;
+#app_right {
+  grid-area: app_right;
   background-color: var(--color-sky); /* Using theme color */
   color: var(--color-foreground); /* Text color */
   padding: var(--spacing-md); /* Spacing */

@@ -14,22 +14,13 @@ export const App: React.FC = () => {
   );
   return (
     <Provider>
-      {candidateGameId ? (
-        <DinoKingView
-          gameId={candidateGameId}
-          onExit={() => {
-            setCandidateGameId(null);
+      <RootLayout>
+        <GameLobby
+          onJoin={(id) => {
+            setCandidateGameId(id);
           }}
         />
-      ) : (
-        <RootLayout>
-          <GameLobby
-            onJoin={(id) => {
-              setCandidateGameId(id);
-            }}
-          />
-        </RootLayout>
-      )}
+      </RootLayout>
     </Provider>
   );
 };

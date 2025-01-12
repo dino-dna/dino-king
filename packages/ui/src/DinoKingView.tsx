@@ -5,19 +5,26 @@ import { GameMessages, GameState } from "./interfaces";
 import cx from "classnames";
 import Banner from "./componentlib/Banner";
 import Nanobus from "nanobus";
+import { Link, useParams } from "react-router-dom";
 
 export interface IAppState {
   gameState: GameState;
 }
 
 function assertNever(x: never): never {
-  throw new Error("Unexpected object: " + x);
+  throw new Error(`Unexpected object: ${String(x)}`);
 }
 
-export const DinoKingView: React.FC<{
-  gameId: number;
-  onExit?: () => void;
-}> = ({ gameId, onExit }) => {
+export const DinoKingView: React.FC<{}> = () => {
+  const params = useParams();
+  const candidateGameId = Number(params.gameId ?? "-1");
+  const gameId =
+    Number.isInteger(candidateGameId) && candidateGameId >= 0
+      ? candidateGameId
+      : null;
+
+  const gameIdErrorMessage = gameId === null ? "Invalid game ID" : null;
+
   const [bus] = React.useState(new Nanobus());
   (window as any).bus = bus;
 
@@ -47,7 +54,6 @@ export const DinoKingView: React.FC<{
   });
   let banner: React.ReactNode | null = null;
   let gameNode: React.ReactNode | null = null;
-  let greatSuff: React.ReactNode | null = null;
 
   switch (type) {
     case "Running":
@@ -58,7 +64,6 @@ export const DinoKingView: React.FC<{
       banner = <Banner type="error" children={type} />;
       break;
     case "Stopped":
-      onExit?.();
       break;
     default:
       // https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -69,11 +74,15 @@ export const DinoKingView: React.FC<{
     "DinoKingView--error": !!error,
     "DinoKingView--running": isGameRunning,
   });
-  return (
+  return gameIdErrorMessage ? (
+    <>
+      <Banner type="error">{gameIdErrorMessage}</Banner>
+      <Link to="/">Go home.</Link>
+    </>
+  ) : (
     <div className={appClassnames}>
       {banner}
       {isGameRunning && gameNode}
-      {greatSuff}
       <pre id="game_state" className={gameStateClassNames} />
     </div>
   );

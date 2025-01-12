@@ -31,6 +31,11 @@
         "noBannedTypes": {
           "level": "off"
         }
+      },
+      "correctness": {
+        "noChildrenProp": {
+          "level": "off"
+        }
       }
     }
   }
