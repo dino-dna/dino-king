@@ -163,9 +163,6 @@ importers:
       rollup-plugin-visualizer:
         specifier: 5.12.0
         version: 5.12.0(rollup@2.79.1)
-      sass-embedded:
-        specifier: 1.77.8
-        version: 1.77.8
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -3359,6 +3356,7 @@ packages:
   eslint@8.57.0:
     resolution: {integrity: sha512-dZ6+mexnaTIbSBZWgou51U6OmzIhYM2VcNdtiTtI7qPNZm35Akpr0f6vtw3w1Kmn5PYo+tZVfh13WrhpS6oLqQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -3629,7 +3627,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -4693,6 +4691,7 @@ packages:
 
   lodash.omit@4.5.0:
     resolution: {integrity: sha512-XeqSp49hNGmlkj2EJlfrQFIzQ6lXdNro9sddtQzcJY8QaoC2GO0DT7xaIokHeyM+mIT0mPMlPvkYzg2xCuHdZg==}
+    deprecated: This package is deprecated. Use destructuring assignment syntax instead.
 
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
@@ -6469,6 +6468,10 @@ packages:
 
   source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
+    engines: {node: '>=0.10.0'}
+
+  source-map-js@1.2.1:
+    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
   source-map-loader@3.0.2:
@@ -8410,7 +8413,8 @@ snapshots:
   '@biomejs/cli-win32-x64@1.8.3':
     optional: true
 
-  '@bufbuild/protobuf@1.10.0': {}
+  '@bufbuild/protobuf@1.10.0':
+    optional: true
 
   '@carbon/colors@11.24.0':
     dependencies:
@@ -10118,7 +10122,8 @@ snapshots:
     dependencies:
       node-int64: 0.4.0
 
-  buffer-builder@0.2.0: {}
+  buffer-builder@0.2.0:
+    optional: true
 
   buffer-from@1.1.2: {}
 
@@ -14474,6 +14479,7 @@ snapshots:
   rxjs@7.8.1:
     dependencies:
       tslib: 2.6.3
+    optional: true
 
   safe-array-concat@1.1.2:
     dependencies:
@@ -14577,6 +14583,7 @@ snapshots:
       sass-embedded-win32-arm64: 1.77.8
       sass-embedded-win32-ia32: 1.77.8
       sass-embedded-win32-x64: 1.77.8
+    optional: true
 
   sass-loader@12.6.0(sass-embedded@1.77.8)(sass@1.77.8)(webpack@5.93.0):
     dependencies:
@@ -14591,7 +14598,7 @@ snapshots:
     dependencies:
       chokidar: 3.6.0
       immutable: 4.3.7
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
 
   sax@1.2.4: {}
 
@@ -14813,6 +14820,8 @@ snapshots:
   source-list-map@2.0.1: {}
 
   source-map-js@1.2.0: {}
+
+  source-map-js@1.2.1: {}
 
   source-map-loader@3.0.2(webpack@5.93.0):
     dependencies:
@@ -15470,7 +15479,8 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  varint@6.0.0: {}
+  varint@6.0.0:
+    optional: true
 
   vary@1.1.2: {}
 
