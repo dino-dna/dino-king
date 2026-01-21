@@ -48,7 +48,7 @@
     "classnames": "^2.5.1",
     "common": "workspace:*",
     "http-proxy-middleware": "^0.21.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "nanobus": "^4.5.0"
   },
   "browserslist": {
