@@ -47,7 +47,7 @@
     "@carbon/react": "^1.63.2",
     "classnames": "^2.5.1",
     "common": "workspace:*",
-    "http-proxy-middleware": "^0.21.0",
+    "http-proxy-middleware": "^2.0.0",
     "lodash": "^4.17.21",
     "nanobus": "^4.5.0"
   },
